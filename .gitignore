@@ -1,1 +1,6 @@
 /build
+ios/Build/Intermediates
+ios/tmxparser/DerivedData/ModuleCache
+ios/tmxparser/DerivedData/tmxparser/Build/Intermediates
+ios/tmxparser/DerivedData/tmxparser/Index
+ios/tmxparser/DerivedData/tmxparser/Logs
