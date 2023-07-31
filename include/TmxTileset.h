@@ -60,6 +60,8 @@ namespace Tmx
         /// Returns the global id of the first tile.
         int GetFirstGid() const { return first_gid; }
 
+        const std::string &GetFilePath() const { return file_path; }
+
         /// Returns the name of the tileset.
         const std::string &GetName() const { return name; }
 
@@ -99,7 +101,8 @@ namespace Tmx
 
     private:
         int first_gid;
-        
+        std::string file_path;
+
         std::string name;
         
         int tile_width;

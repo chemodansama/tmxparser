@@ -118,6 +118,14 @@ namespace Tmx
         if ( source_name )
         {
             std::string fileName = file_path + source_name;
+            auto it = fileName.find_last_of("/\\");
+            if (it != std::string::npos)
+            {
+                it += 1;
+            }
+
+            this->file_path = fileName.substr(0, it);
+
             tileset_doc.LoadFile( fileName.c_str() );
 
             if ( tileset_doc.ErrorID() != 0)
@@ -131,6 +139,10 @@ namespace Tmx
             assert(tilesetNode); //RJCB
 
             tilesetElem = tilesetNode->ToElement();
+        }
+        else
+        {
+            this->file_path = file_path;
         }
 
         tile_width = tilesetElem->IntAttribute("tilewidth");
