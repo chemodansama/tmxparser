@@ -73,6 +73,9 @@ namespace Tmx
         tileLayerElem->QueryFloatAttribute("opacity", &opacity);
         tileLayerElem->QueryBoolAttribute("visible", &visible);
 
+        tileLayerElem->QueryFloatAttribute("offsetx", &offsetX);
+        tileLayerElem->QueryFloatAttribute("offsety", &offsetY);
+
         // Read the properties.
         const tinyxml2::XMLNode *propertiesNode = tileLayerNode->FirstChildElement("properties");
         if (propertiesNode) 

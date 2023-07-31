@@ -114,6 +114,9 @@ namespace Tmx
         /// See: TileLayerCompressionType
         Tmx::TileLayerCompressionType GetCompression() const { return compression; }
 
+        float GetOffsetX() const { return offsetX; }
+        float GetOffsetY() const { return offsetY; }
+
     private:
         void ParseXML(const tinyxml2::XMLNode *dataNode);
         void ParseBase64(const std::string &innerText);
@@ -123,5 +126,8 @@ namespace Tmx
 
         Tmx::TileLayerEncodingType encoding;
         Tmx::TileLayerCompressionType compression;
+
+        float offsetX{ 0.0f };
+        float offsetY{ 0.0f };
     };
 }
