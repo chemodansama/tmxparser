@@ -31,6 +31,11 @@
 
 #include "TmxPoint.h"
 
+namespace tinyxml2
+{
+    class XMLNode;
+}
+
 namespace Tmx
 {
     //-------------------------------------------------------------------------
@@ -53,6 +58,8 @@ namespace Tmx
         
         /// Get the RadiusY of the object, in pixels.
         int GetRadiusY() const { return radiusY; }
+
+        void Parse(const tinyxml2::XMLNode *textNode) {}
 
     private:
         int x;
