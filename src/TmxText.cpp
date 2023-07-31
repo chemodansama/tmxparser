@@ -39,15 +39,6 @@ namespace Tmx
     {
     }
 
-    Text::~Text()
-    {
-      if(color)
-      {
-          delete color;
-          color = nullptr;
-      }
-    }
-
     void Text::Parse(const tinyxml2::XMLNode *textNode)
     {
         auto textElement = textNode->ToElement();
@@ -84,6 +75,6 @@ namespace Tmx
         }
 
         if(textElement->FindAttribute("color"))
-            color = new Color(textElement->Attribute("color"));
+            color = Color(textElement->Attribute("color"));
     }
 }

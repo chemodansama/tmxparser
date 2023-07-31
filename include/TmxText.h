@@ -64,13 +64,12 @@ namespace Tmx
     public:
         /// Construct text with the given options.
         Text();
-        ~Text();
 
         std::string GetContents() const noexcept { return contents; }
         std::string GetFontFamily() const noexcept { return font_family; }
         int GetPixelSize() const noexcept { return pixel_size; }
         bool Wraps() const noexcept { return wrap; }
-        Color* GetColor() const noexcept { return color; }
+        Color GetColor() const noexcept { return color; }
         bool IsBold() const noexcept { return bold; }
         bool IsItalic() const noexcept { return italic; }
         bool IsUnderline() const noexcept { return underline; }
@@ -87,7 +86,7 @@ namespace Tmx
         std::string font_family;
         int pixel_size;
         bool wrap;
-        Color* color;
+        Color color;
         bool bold;
         bool italic;
         bool underline;
