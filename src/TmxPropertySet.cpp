@@ -44,7 +44,7 @@ namespace Tmx
         properties.clear();
     }
 
-    void PropertySet::Parse(const tinyxml2::XMLNode *propertiesNode)
+    void PropertySet::Parse(const tinyxml2::XMLNode *propertiesNode, const PropertySet *pattern)
     {
         // Iterate through all of the property nodes.
         const tinyxml2::XMLNode *propertyNode = propertiesNode->FirstChildElement("property");
@@ -68,6 +68,18 @@ namespace Tmx
 
             //propertyNode = propertiesNode->IterateChildren("property", propertyNode); FIXME MAYBE
             propertyNode = propertyNode->NextSiblingElement("property");
+        }
+
+        if (pattern)
+        {
+            for (auto &p : pattern->GetPropertyMap())
+            {
+                auto it = properties.find(p.first);
+                if (it == properties.end())
+                {
+                    properties.emplace(p.first, p.second);
+                }
+            }
         }
     }
 		

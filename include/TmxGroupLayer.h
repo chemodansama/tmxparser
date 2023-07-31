@@ -41,7 +41,7 @@ namespace Tmx
     {
     public:
         /// Construct an GroupLayer on the given map.
-        GroupLayer(const Tmx::Map *_map);
+        GroupLayer(Tmx::Map *_map);
         ~GroupLayer();
 
         /// Parse a GroupLayer element.

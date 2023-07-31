@@ -33,7 +33,7 @@
 
 namespace Tmx 
 {
-    ObjectGroup::ObjectGroup(const Tmx::Map *_map)
+    ObjectGroup::ObjectGroup(Tmx::Map *_map)
         : Layer(_map, std::string(), 0, 0, 0, 0, 1.0f, true, TMX_LAYERTYPE_OBJECTGROUP)
         , color()
         , objects()
@@ -82,7 +82,7 @@ namespace Tmx
         {
             // Allocate a new object and parse it.
             Object *object = new Object();
-            object->Parse(objectNode);
+            object->Parse(objectNode, map);
             
             // Add the object to the list.
             objects.push_back(object);

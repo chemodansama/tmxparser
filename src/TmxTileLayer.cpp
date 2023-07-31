@@ -42,7 +42,7 @@
 
 namespace Tmx 
 {
-    TileLayer::TileLayer(const Map *_map) 
+    TileLayer::TileLayer(Map *_map)
         : Layer(_map, std::string(), 0, 0, _map->GetWidth(), _map->GetHeight(), 1.0f, true, TMX_LAYERTYPE_TILE)
         , tile_map(NULL)  // Set the map to null to specify that it is not yet allocated.
         , encoding(TMX_ENCODING_XML)

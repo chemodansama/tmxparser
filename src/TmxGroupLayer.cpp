@@ -34,7 +34,7 @@
 
 namespace Tmx {
 
-    GroupLayer::GroupLayer(const Tmx::Map *_map)
+    GroupLayer::GroupLayer(Tmx::Map *_map)
         : Layer(_map, std::string(), 0, 0, 0, 0, 1.0f, true, TMX_LAYERTYPE_GROUP_LAYER)
     {
     }

@@ -73,7 +73,7 @@ namespace Tmx
 
     public:
         /// Construct a TileLayer on the given map.
-        TileLayer(const Tmx::Map *_map);
+        TileLayer(Tmx::Map *_map);
         ~TileLayer();
 
         /// Parse a tile layer node.

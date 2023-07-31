@@ -59,7 +59,7 @@ namespace Tmx
 
     public:
         /// Construct a new Layer used by a map's objectgroup
-        Layer(const Tmx::Map *_map, const std::string _name, const int _x, const int _y,
+        Layer(Tmx::Map *_map, const std::string _name, const int _x, const int _y,
               const int _width, const int _height, const float _opacity, const bool _visible, const LayerType _layerType);
 
 				/// Construct a new layer used by a tile's objectgroup
@@ -112,7 +112,7 @@ namespace Tmx
 
     protected:
         /// @cond INTERNAL
-        const Tmx::Map *map;
+        Tmx::Map *map;
 				const Tmx::Tile *tile;
         std::string name;
 

@@ -34,7 +34,7 @@ using std::string;
 
 namespace Tmx
 {
-    ImageLayer::ImageLayer(const Tmx::Map *_map)
+    ImageLayer::ImageLayer(Tmx::Map *_map)
         : Layer(_map, std::string(), 0, 0, 0, 0, 1.0f, true, TMX_LAYERTYPE_IMAGE_LAYER)
         , image(NULL)
     {

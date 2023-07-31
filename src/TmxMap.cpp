@@ -164,8 +164,9 @@ namespace Tmx
         Parse( mapNode );
     }
 
-    void Map::ParseText(const string &text)
+    void Map::ParseText(const string &text, const std::string &path)
     {
+        file_path = path;
         // Create a tiny xml document and use it to parse the text.
         tinyxml2::XMLDocument doc;
         doc.Parse(text.c_str());

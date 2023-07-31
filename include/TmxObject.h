@@ -41,6 +41,7 @@ namespace Tmx
     class Polygon;
     class Polyline;
     class Text;
+    class Map;
 
     //-------------------------------------------------------------------------
     /// Class used for representing a single object from the objectgroup.
@@ -52,7 +53,7 @@ namespace Tmx
         ~Object();
 
         /// Parse an object node.
-        void Parse(const tinyxml2::XMLNode *objectNode);
+        void Parse(const tinyxml2::XMLNode *objectNode, Map *map);
 
         /// Get the name of the object.
         const std::string &GetName() const { return name; }

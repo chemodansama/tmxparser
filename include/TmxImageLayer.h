@@ -42,7 +42,7 @@ namespace Tmx
     {
     public:
         /// Construct an ImageLayer on the given map.
-        ImageLayer(const Tmx::Map *_map);
+        ImageLayer(Tmx::Map *_map);
         ~ImageLayer();
 
         /// Parse a ImageLayer element.

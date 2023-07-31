@@ -49,7 +49,7 @@ namespace Tmx
     {
     public:
         /// Construct a new ObjectGroup
-        ObjectGroup(const Tmx::Map *_map);
+        ObjectGroup(Tmx::Map *_map);
 
 				/// Construct a new ObjectGroup used by a Tile
 				ObjectGroup(const Tmx::Tile *_tile);

@@ -27,8 +27,9 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
+#include <unordered_map>
 
 #include "TmxPropertySet.h"
 
@@ -37,6 +38,7 @@ namespace Tmx
     class Layer;
     class TileLayer;
     class ImageLayer;
+    class Object;
     class ObjectGroup;
     class GroupLayer;
     class Tileset;
@@ -127,7 +129,7 @@ namespace Tmx
         void ParseFile(const std::string &fileName);
 
         /// Parse text containing TMX formatted XML.
-        void ParseText(const std::string &text);
+        void ParseText(const std::string &text, const std::string &path = "");
 
         /// Get the filename used to read the map.
         const std::string &GetFilename() const { return file_name; }
@@ -198,6 +200,8 @@ namespace Tmx
         /// Get the whole collection of object groups.
         const std::vector< Tmx::ObjectGroup* > &GetObjectGroups() const { return object_groups; }
 
+        std::unordered_map< std::string, Tmx::Object* > &GetTemplates() { return templates; }
+
         /// Get the image layer at a certain index.
         const Tmx::ImageLayer *GetImageLayer(int index) const { return image_layers.at(index); }
 
@@ -263,6 +267,7 @@ namespace Tmx
         std::vector< Tmx::ObjectGroup* > object_groups;
         std::vector< Tmx::GroupLayer* > group_layers;
         std::vector< Tmx::Tileset* > tilesets;
+        std::unordered_map< std::string, Tmx::Object* > templates;
 
         bool has_error;
         unsigned char error_code;

@@ -51,7 +51,7 @@ namespace Tmx
         ~PropertySet();
 
         /// Parse a node containing all the property nodes.
-        void Parse(const tinyxml2::XMLNode *propertiesNode);
+        void Parse(const tinyxml2::XMLNode *propertiesNode, const PropertySet *pattern = nullptr);
         /// Get a int property.
         int GetIntProperty(const std::string &name, int defaultValue = 0) const;
         /// Get a float property.

@@ -46,7 +46,7 @@ int Tmx::Layer::nextParseOrder = 0;
 
 namespace Tmx 
 {
-    Layer::Layer(const Tmx::Map *_map, const std::string _name, const int _x, const int _y, const int _width, const int _height, const float _opacity, const bool _visible, const LayerType _layerType) 
+    Layer::Layer(Tmx::Map *_map, const std::string _name, const int _x, const int _y, const int _width, const int _height, const float _opacity, const bool _visible, const LayerType _layerType)
         : map(_map)
 				, tile(NULL)
         , name(_name)
