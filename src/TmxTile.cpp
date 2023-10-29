@@ -127,4 +127,9 @@ namespace Tmx
         }
 
     }
+
+    int Tile::GetFrameCount() const
+    {
+        return frames.size();
+    }
 }

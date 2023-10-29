@@ -72,10 +72,7 @@ namespace Tmx
         }
 
         /// Returns the number of frames of the animation. If the tile is not animated, returns 0.
-        int GetFrameCount() const
-        {
-            return frames.size();
-        }
+        int GetFrameCount() const;
 
         /// Returns the total duration of the animation, in milliseconds,
         /// or 0 if the tile is not animated.
