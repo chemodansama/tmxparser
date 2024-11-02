@@ -50,8 +50,6 @@ namespace Tmx
         /// Initialize a color from a string hexadecimal representation in the format "#AARRGGBB" or "#RRGGBB".
         explicit Color(const std::string& str);
 
-        ~Color();
-
         /// Default copy constructor.
         Color(const Color&) = default;
 

@@ -65,10 +65,6 @@ namespace Tmx
         if(str.length() == 7) color |= 0xff000000;
     }
 
-    Color::~Color()
-    {
-    }
-
     uint8_t Color::GetAlpha() const
     {
         return (color & 0xff000000) >> 24;
