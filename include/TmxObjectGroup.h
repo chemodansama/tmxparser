@@ -25,23 +25,21 @@
 //
 // Author: Tamir Atias
 //-----------------------------------------------------------------------------
+
 #pragma once
 
 #include <string>
 #include <vector>
 
+#include <tinyxml2.h>
+
 #include "TmxLayer.h"
-#include "TmxPropertySet.h"
+#include "TmxObject.h"
 
-namespace tinyxml2
+namespace Tmx
 {
-    class XMLNode;
-}
+    class Map;
 
-namespace Tmx 
-{
-    class Object;
-    
     //-------------------------------------------------------------------------
     /// A class used for holding a list of objects.
     /// This class has a property set.

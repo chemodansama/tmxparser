@@ -25,25 +25,18 @@
 //
 // Author: Tamir Atias
 //-----------------------------------------------------------------------------
-#include <tinyxml2.h>
 
-#include "TmxLayer.h"
 #include "TmxObjectGroup.h"
-#include "TmxObject.h"
 
 namespace Tmx 
 {
     ObjectGroup::ObjectGroup(Tmx::Map *_map)
-        : Layer(_map, std::string(), 0, 0, 0, 0, 1.0f, true, TMX_LAYERTYPE_OBJECTGROUP)
-        , color()
-        , objects()
+        : Layer{ _map, std::string(), 0, 0, 0, 0, 1.0f, true, TMX_LAYERTYPE_OBJECTGROUP }
     {
     }
 
     ObjectGroup::ObjectGroup(const Tmx::Tile *_tile)
-        : Layer(_tile, std::string(), 0, 0, 0, 0, 1.0f, true, TMX_LAYERTYPE_OBJECTGROUP)
-        , color()
-        , objects()
+        : Layer{ _tile, std::string(), 0, 0, 0, 0, 1.0f, true, TMX_LAYERTYPE_OBJECTGROUP }
     {
     }
 
