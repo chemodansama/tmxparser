@@ -30,8 +30,6 @@
 
 #include <cstdlib>
 
-#include <tinyxml2.h>
-
 using std::string;
 using std::map;
 

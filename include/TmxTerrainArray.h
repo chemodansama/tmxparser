@@ -31,9 +31,7 @@
 #include <string>
 #include <vector>
 
-namespace tinyxml2 {
-    class XMLNode;
-}
+#include <tinyxml2.h>
 
 namespace Tmx
 {

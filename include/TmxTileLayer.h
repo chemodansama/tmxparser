@@ -29,13 +29,11 @@
 
 #include <string>
 
+#include <tinyxml2.h>
+
 #include "TmxLayer.h"
 #include "TmxMapTile.h"
 #include "TmxPropertySet.h"
-
-namespace tinyxml2 {
-    class XMLNode;
-}
 
 namespace Tmx 
 {

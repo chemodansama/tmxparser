@@ -28,8 +28,6 @@
 
 #include "TmxImage.h"
 
-#include <tinyxml2.h>
-
 namespace Tmx 
 {   
     Image::Image() 

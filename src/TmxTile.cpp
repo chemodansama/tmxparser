@@ -28,8 +28,6 @@
 
 #include "TmxTile.h"
 
-#include <tinyxml2.h>
-
 #include "TmxObject.h"
 
 namespace Tmx

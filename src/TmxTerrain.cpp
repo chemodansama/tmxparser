@@ -28,8 +28,6 @@
 
 #include "TmxTerrain.h"
 
-#include <tinyxml2.h>
-
 namespace Tmx
 {
     Terrain::Terrain() :

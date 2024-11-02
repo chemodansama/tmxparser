@@ -28,8 +28,6 @@
 
 #include "TmxTileOffset.h"
 
-#include <tinyxml2.h>
-
 namespace Tmx 
 {   
     TileOffset::TileOffset() 

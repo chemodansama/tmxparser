@@ -28,8 +28,6 @@
 
 #include "TmxObject.h"
 
-#include <tinyxml2.h>
-
 #include "TmxEllipse.h"
 #include "TmxMap.h"
 #include "TmxPolygon.h"

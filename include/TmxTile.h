@@ -27,14 +27,11 @@
 #include <string>
 #include <vector>
 
+#include <tinyxml2.h>
+
 #include "TmxImage.h"
 #include "TmxObjectGroup.h"
 #include "TmxPropertySet.h"
-
-namespace tinyxml2
-{
-    class XMLNode;
-}
 
 namespace Tmx
 {

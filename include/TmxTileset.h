@@ -30,11 +30,9 @@
 #include <string>
 #include <vector>
 
-#include "TmxPropertySet.h"
+#include <tinyxml2.h>
 
-namespace tinyxml2 {
-    class XMLNode;
-}
+#include "TmxPropertySet.h"
 
 namespace Tmx 
 {

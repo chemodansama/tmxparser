@@ -29,11 +29,9 @@
 
 #include <vector>
 
-#include "TmxColor.h"
+#include <tinyxml2.h>
 
-namespace tinyxml2 {
-    class XMLNode;
-}
+#include "TmxColor.h"
 
 namespace Tmx
 {

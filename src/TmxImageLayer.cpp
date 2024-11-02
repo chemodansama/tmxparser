@@ -27,8 +27,6 @@
 #include <cassert> //RJCB
 #include <cstdlib>
 
-#include <tinyxml2.h>
-
 #include "TmxImage.h"
 #include "TmxLayer.h"
 

@@ -28,10 +28,15 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 #include "TmxPropertySet.h"
+
+namespace tinyxml2
+{
+    class XMLNode;
+}
 
 namespace Tmx
 {

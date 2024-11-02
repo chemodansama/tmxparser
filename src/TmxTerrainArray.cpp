@@ -30,8 +30,6 @@
 
 #include <cstdlib>
 
-#include <tinyxml2.h>
-
 #include "TmxTerrain.h"
 
 using std::string;

@@ -28,8 +28,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <tinyxml2.h>
-
 #include "TmxImageLayer.h"
 #include "TmxLayer.h"
 #include "TmxObjectGroup.h"

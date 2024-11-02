@@ -27,6 +27,8 @@
 #include <string>
 #include <vector>
 
+#include <tinyxml2.h>
+
 #include "TmxImage.h"
 #include "TmxLayer.h"
 #include "TmxPropertySet.h"

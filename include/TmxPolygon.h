@@ -29,11 +29,9 @@
 
 #include <vector>
 
-#include "TmxPoint.h"
+#include <tinyxml2.h>
 
-namespace tinyxml2 {
-    class XMLNode;
-}
+#include "TmxPoint.h"
 
 namespace Tmx
 {

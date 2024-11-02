@@ -31,11 +31,9 @@
 #include <string>
 #include <unordered_map>
 
-#include "TmxProperty.h"
+#include <tinyxml2.h>
 
-namespace tinyxml2 {
-    class XMLNode;
-}
+#include "TmxProperty.h"
 
 namespace Tmx
 {

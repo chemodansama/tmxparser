@@ -29,11 +29,9 @@
 
 #include <string>
 
-namespace tinyxml2 {
-    class XMLNode;
-}
+#include <tinyxml2.h>
 
-namespace Tmx 
+namespace Tmx
 {
     //-------------------------------------------------------------------------
     /// A class used for used to specify an offset in pixels,

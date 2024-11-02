@@ -28,8 +28,6 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include <tinyxml2.h>
-
 #ifdef USE_MINIZ
 #define MINIZ_HEADER_FILE_ONLY
 #include "miniz.c"

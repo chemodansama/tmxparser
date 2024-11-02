@@ -35,8 +35,6 @@
 #include <zlib.h>
 #endif
 
-#include <tinyxml2.h>
-
 #include "TmxMap.h"
 #include "TmxTileset.h"
 #include "TmxUtil.h"

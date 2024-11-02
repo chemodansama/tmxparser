@@ -28,8 +28,6 @@
 
 #include "TmxProperty.h"
 
-#include <tinyxml2.h>
-
 namespace Tmx
 {
     Property::Property()

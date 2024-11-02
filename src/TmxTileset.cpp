@@ -30,8 +30,6 @@
 
 #include <cassert> //RJCB
 
-#include <tinyxml2.h>
-
 #include "TmxImage.h"
 #include "TmxMap.h"
 #include "TmxTerrain.h"
