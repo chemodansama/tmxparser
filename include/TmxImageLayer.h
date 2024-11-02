@@ -27,13 +27,13 @@
 #include <string>
 #include <vector>
 
+#include "TmxImage.h"
 #include "TmxLayer.h"
 #include "TmxPropertySet.h"
 
-namespace Tmx 
+namespace Tmx
 {
     class Map;
-    class Image;
 
     //-------------------------------------------------------------------------
     /// A class used for holding information about a background image.
@@ -43,14 +43,14 @@ namespace Tmx
     {
     public:
         /// Construct an ImageLayer on the given map.
-        ImageLayer(Tmx::Map *_map);
+        explicit ImageLayer(Tmx::Map *_map);
 
         /// Parse a ImageLayer element.
-        void Parse(const tinyxml2::XMLNode *imageLayerNode);
+        void Parse(const tinyxml2::XMLNode *imageLayerNode) override;
 
         /// Returns a variable containing information
         /// about the image of the ImageLayer.
-        const Tmx::Image* GetImage() const { return image.get(); }
+        [[nodiscard]] const Tmx::Image* GetImage() const { return image.get(); }
 
     private:
         std::unique_ptr<Tmx::Image> image;
