@@ -25,13 +25,15 @@
 //
 // Author: Tamir Atias
 //-----------------------------------------------------------------------------
+
+#include "TmxObject.h"
+
 #include <tinyxml2.h>
 
+#include "TmxEllipse.h"
 #include "TmxMap.h"
-#include "TmxObject.h"
 #include "TmxPolygon.h"
 #include "TmxPolyline.h"
-#include "TmxEllipse.h"
 #include "TmxText.h"
 
 namespace Tmx

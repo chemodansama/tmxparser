@@ -29,17 +29,19 @@
 
 #include <string>
 
-#include "TmxPropertySet.h"
 #include "TmxMapTile.h"
+#include "TmxPropertySet.h"
 
-namespace tinyxml2 {
+namespace tinyxml2
+{
     class XMLNode;
 }
 
 namespace Tmx
 {
     class Map;
-		class Tile;
+    class Tile;
+
     enum LayerType
     {
         TMX_LAYERTYPE_TILE        = 0X01,
@@ -56,11 +58,13 @@ namespace Tmx
     public:
         /// Construct a new Layer used by a map's objectgroup
         Layer(Tmx::Map *_map, const std::string _name, const int _x, const int _y,
-              const int _width, const int _height, const float _opacity, const bool _visible, const LayerType _layerType);
+            const int _width, const int _height, const float _opacity, const bool _visible,
+            const LayerType _layerType);
 
         /// Construct a new layer used by a tile's objectgroup
         Layer(const Tmx::Tile *_tile, const std::string _name, const int _x, const int _y,
-              const int _width, const int _height, const float _opacity, const bool _visible, const LayerType _layerType);
+            const int _width, const int _height, const float _opacity, const bool _visible,
+            const LayerType _layerType);
 
         Layer(const Layer &source) = delete;
         Layer &operator=(const Layer &source) = delete;
@@ -140,8 +144,6 @@ namespace Tmx
         Tmx::LayerType layerType;
 
         Tmx::PropertySet properties;
-
-        static int nextParseOrder;
         /// @endcond
     };
 }

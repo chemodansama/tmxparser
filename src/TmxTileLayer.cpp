@@ -21,8 +21,14 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
-#include <tinyxml2.h>
+
+#include "TmxTileLayer.h"
+
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+
+#include <tinyxml2.h>
 
 #ifdef USE_MINIZ
 #define MINIZ_HEADER_FILE_ONLY
@@ -31,11 +37,7 @@
 #include <zlib.h>
 #endif
 
-#include <stdlib.h>
-#include <stdio.h>
-
 #include "TmxLayer.h"
-#include "TmxTileLayer.h"
 #include "TmxUtil.h"
 #include "TmxMap.h"
 #include "TmxTileset.h"

@@ -27,8 +27,8 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include <string>
 #include <cstdint>
+#include <string>
 
 namespace Tmx
 {

@@ -25,16 +25,19 @@
 //
 // Author: Tamir Atias
 //-----------------------------------------------------------------------------
-#include <tinyxml2.h>
-#include <cassert> //RJCB
 
 #include "TmxTileset.h"
-#include "TmxTileOffset.h"
-#include "TmxTerrainArray.h"
-#include "TmxTerrain.h"
+
+#include <cassert> //RJCB
+
+#include <tinyxml2.h>
+
 #include "TmxImage.h"
-#include "TmxTile.h"
 #include "TmxMap.h"
+#include "TmxTerrain.h"
+#include "TmxTerrainArray.h"
+#include "TmxTile.h"
+#include "TmxTileOffset.h"
 
 using std::vector;
 using std::string;

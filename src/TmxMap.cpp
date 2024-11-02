@@ -25,16 +25,19 @@
 //
 // Author: Tamir Atias
 //-----------------------------------------------------------------------------
-#include <tinyxml2.h>
-#include <stdio.h>
 
 #include "TmxMap.h"
-#include "TmxTileset.h"
-#include "TmxLayer.h"
-#include "TmxTileLayer.h"
-#include "TmxObjectGroup.h"
-#include "TmxImageLayer.h"
+
+#include <cstdio>
+
+#include <tinyxml2.h>
+
 #include "TmxGroupLayer.h"
+#include "TmxImageLayer.h"
+#include "TmxLayer.h"
+#include "TmxObjectGroup.h"
+#include "TmxTileLayer.h"
+#include "TmxTileset.h"
 
 using std::vector;
 using std::string;

@@ -28,6 +28,7 @@
 #pragma once
 
 #include <vector>
+
 #include "TmxColor.h"
 
 namespace tinyxml2 {

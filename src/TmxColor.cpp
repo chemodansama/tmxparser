@@ -25,7 +25,9 @@
 //
 // Author: Guillaume Bertholon
 //-----------------------------------------------------------------------------
+
 #include "TmxColor.h"
+
 #include <cstdio>
 #include <cstdlib>
 

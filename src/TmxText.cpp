@@ -25,10 +25,12 @@
 //
 // Author: Adaleigh Martin
 //-----------------------------------------------------------------------------
+
 #include "TmxText.h"
-#include <tinyxml2.h>
+
 #include <cstdlib>
 
+#include <tinyxml2.h>
 
 namespace Tmx
 {

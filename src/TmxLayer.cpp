@@ -21,8 +21,12 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
-#include <tinyxml2.h>
+
+#include "TmxLayer.h"
+
 #include <algorithm>
+#include <cstdlib>
+#include <cstdio>
 
 #ifdef USE_MINIZ
 #define MINIZ_HEADER_FILE_ONLY
@@ -31,18 +35,19 @@
 #include <zlib.h>
 #endif
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <tinyxml2.h>
 
-#include "TmxLayer.h"
-#include "TmxUtil.h"
 #include "TmxMap.h"
 #include "TmxTileset.h"
+#include "TmxUtil.h"
 
-// Avoid nextParseOrder to be included in the documentation as it is an implementation detail that should not be considered as a part of the API.
-/// @cond INTERNAL
-int Tmx::Layer::nextParseOrder = 0;
-/// @endcond
+namespace
+{
+    // Avoid nextParseOrder to be included in the documentation as it is an implementation detail that should not be considered as a part of the API.
+    /// @cond INTERNAL
+    int nextParseOrder = 0;
+    /// @endcond
+}
 
 namespace Tmx 
 {

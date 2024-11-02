@@ -25,9 +25,13 @@
 //
 // Author: Tamir Atias
 //-----------------------------------------------------------------------------
-#include <stdlib.h>
+
+#include "TmxUtil.h"
+
 #include <algorithm>
 #include <cctype>
+#include <cstdio>
+#include <cstdlib>
 #include <functional>
 
 #ifdef USE_MINIZ
@@ -37,9 +41,6 @@
 #include <zlib.h>
 #endif
 
-#include <stdio.h>
-
-#include "TmxUtil.h"
 #include "base64/base64.h"
 
 namespace Tmx {

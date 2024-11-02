@@ -21,16 +21,19 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
-#include <tinyxml2.h>
-#include <cstdlib>
+
+#include "TmxGroupLayer.h"
+
 #include <cassert> //RJCB
+#include <cstdlib>
 #include <cstring>
 
-#include "TmxLayer.h"
-#include "TmxGroupLayer.h"
-#include "TmxTileLayer.h"
-#include "TmxObjectGroup.h"
+#include <tinyxml2.h>
+
 #include "TmxImageLayer.h"
+#include "TmxLayer.h"
+#include "TmxObjectGroup.h"
+#include "TmxTileLayer.h"
 
 namespace Tmx {
 

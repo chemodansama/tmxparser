@@ -23,13 +23,13 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include <vector>
-
-#include "TmxPropertySet.h"
-#include "TmxImage.h"
-#include "TmxObjectGroup.h"
 #include <stdexcept>
 #include <string>
+#include <vector>
+
+#include "TmxImage.h"
+#include "TmxObjectGroup.h"
+#include "TmxPropertySet.h"
 
 namespace tinyxml2
 {

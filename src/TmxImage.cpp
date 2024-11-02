@@ -25,9 +25,10 @@
 //
 // Author: Tamir Atias
 //-----------------------------------------------------------------------------
-#include <tinyxml2.h>
 
 #include "TmxImage.h"
+
+#include <tinyxml2.h>
 
 namespace Tmx 
 {   

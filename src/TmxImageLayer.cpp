@@ -21,13 +21,16 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
-#include <tinyxml2.h>
-#include <cstdlib>
-#include <cassert> //RJCB
 
-#include "TmxLayer.h"
 #include "TmxImageLayer.h"
+
+#include <cassert> //RJCB
+#include <cstdlib>
+
+#include <tinyxml2.h>
+
 #include "TmxImage.h"
+#include "TmxLayer.h"
 
 using std::vector;
 using std::string;

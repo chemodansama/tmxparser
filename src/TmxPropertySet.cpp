@@ -25,10 +25,12 @@
 //
 // Author: Tamir Atias
 //-----------------------------------------------------------------------------
-#include <tinyxml2.h>
-#include <cstdlib>
 
 #include "TmxPropertySet.h"
+
+#include <cstdlib>
+
+#include <tinyxml2.h>
 
 using std::string;
 using std::map;
