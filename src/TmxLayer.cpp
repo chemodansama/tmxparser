@@ -89,12 +89,12 @@ namespace Tmx
         const auto nameAttribute = layerElement->Attribute("name");
         name = nameAttribute ? std::string{ nameAttribute } : std::string{};
 
-        const auto intAttribute = [layerElement](const char *name, auto defaultValue) {
+        const auto floatAttribute = [layerElement](const char *name, auto defaultValue) {
             const auto a = layerElement->Attribute(name);
-            return a ? std::atoi(a) : defaultValue;
+            return a ? std::atof(a) : defaultValue;
         };
 
-        parallaxX = intAttribute("parallaxx", parallaxX);
-        parallaxY = intAttribute("parallaxy", parallaxY);
+        parallaxX = floatAttribute("parallaxx", parallaxX);
+        parallaxY = floatAttribute("parallaxy", parallaxY);
     }
 }
