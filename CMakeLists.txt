@@ -102,20 +102,27 @@ target_include_directories(tmxparser PUBLIC
 
 target_compile_options(tmxparser
   PRIVATE -pedantic
-  PRIVATE -Wall
-  PRIVATE -Werror=strict-prototypes
-  PRIVATE -Werror=old-style-definition
-  PRIVATE -Werror=missing-prototypes)
-if(NOT USE_MINIZ)
+  PRIVATE -Wall)
+
+if(CMAKE_COMPILER_IS_GNUCXX)
   target_compile_options(tmxparser
-    PRIVATE -Werror)
+    PRIVATE -Werror=strict-prototypes
+    PRIVATE -Werror=old-style-definition
+    PRIVATE -Werror=missing-prototypes)
+endif()
+
+if(NOT USE_MINIZ)
+  if(CMAKE_COMPILER_IS_GNUCXX)
+    target_compile_options(tmxparser
+      PRIVATE -Werror)
+  endif()
 endif()
 
 target_compile_features(tmxparser
   PRIVATE cxx_std_11)
 
 target_link_libraries(tmxparser
-  PRIVATE tinyxml2)
+  PRIVATE tinyxml2::tinyxml2)
 
 if(NOT USE_MINIZ)
   target_link_libraries(tmxparser
