@@ -33,7 +33,8 @@
 #include "TmxLayer.h"
 #include "TmxPropertySet.h"
 
-namespace tinyxml2 {
+namespace tinyxml2
+{
     class XMLNode;
 }
 
@@ -51,9 +52,15 @@ namespace Tmx
         /// Construct a new ObjectGroup
         ObjectGroup(Tmx::Map *_map);
 
-				/// Construct a new ObjectGroup used by a Tile
-				ObjectGroup(const Tmx::Tile *_tile);
-				
+        /// Construct a new ObjectGroup used by a Tile
+        ObjectGroup(const Tmx::Tile *_tile);
+
+        ObjectGroup(const ObjectGroup &) = delete;
+        ObjectGroup& operator=(const ObjectGroup &) = delete;
+
+        ObjectGroup(ObjectGroup &&source) noexcept;
+        ObjectGroup &operator=(ObjectGroup &&source) noexcept;
+
         ~ObjectGroup();
 
         /// Parse an objectgroup node.
@@ -69,15 +76,10 @@ namespace Tmx
         Tmx::Color GetColor() const { return color; }
 
         /// Get the whole list of objects.
-        const std::vector< Tmx::Object* > &GetObjects() const { return objects; }
-				
-				/// Get the property set.
-				const Tmx::PropertySet &GetProperties() const { return properties; }
+        const std::vector<Tmx::Object*> &GetObjects() const { return objects; }
 
     private:
         Tmx::Color color;
-
-        std::vector< Tmx::Object* > objects;
-				Tmx::PropertySet properties;
+        std::vector<Tmx::Object*> objects;
     };
 }

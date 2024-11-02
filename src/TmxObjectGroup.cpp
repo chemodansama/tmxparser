@@ -37,20 +37,38 @@ namespace Tmx
         : Layer(_map, std::string(), 0, 0, 0, 0, 1.0f, true, TMX_LAYERTYPE_OBJECTGROUP)
         , color()
         , objects()
-    {}
+    {
+    }
 
-		ObjectGroup::ObjectGroup(const Tmx::Tile *_tile)
+    ObjectGroup::ObjectGroup(const Tmx::Tile *_tile)
         : Layer(_tile, std::string(), 0, 0, 0, 0, 1.0f, true, TMX_LAYERTYPE_OBJECTGROUP)
         , color()
         , objects()
-    {}
-			
+    {
+    }
+
+    ObjectGroup::ObjectGroup(ObjectGroup &&source) noexcept
+        : Layer{ std::move(source) }
+        , color{ source.color }
+        , objects{ std::move(source.objects) }
+    {
+    }
+
+    ObjectGroup &ObjectGroup::operator=(ObjectGroup &&source) noexcept
+    {
+        Layer::operator=(std::move(source));
+
+        color = std::move(source.color);
+        objects = std::move(source.objects);
+
+        return *this;
+    }
+
     ObjectGroup::~ObjectGroup() 
     {
-        for(std::size_t i = 0; i < objects.size(); i++)
+        for (const auto o : objects)
         {
-            Object *obj = objects.at(i);
-            delete obj;
+            delete o;
         }
     }
 
@@ -59,19 +77,19 @@ namespace Tmx
         const tinyxml2::XMLElement *objectGroupElem = objectGroupNode->ToElement();
 
         // Read the object group attributes, set to unknown if not defined in XML
-				objectGroupElem->Attribute("name") != NULL ? name = objectGroupElem->Attribute("name"): name = "unknown";
+        const auto nameAttribute = objectGroupElem->Attribute("name");
+        name = nameAttribute ? nameAttribute : "unknown";
 
-        if (objectGroupElem->Attribute("color"))
+        if (const auto colorAttribute = objectGroupElem->Attribute("color"))
         {
-            color = Tmx::Color(objectGroupElem->Attribute("color"));
+            color = Tmx::Color(colorAttribute);
         }
-        
+
         objectGroupElem->QueryFloatAttribute("opacity", &opacity);
         objectGroupElem->QueryBoolAttribute("visible", &visible);
 
         // Read the properties.
-        const tinyxml2::XMLNode *propertiesNode = objectGroupNode->FirstChildElement("properties");
-        if (propertiesNode) 
+        if (const auto propertiesNode = objectGroupNode->FirstChildElement("properties"))
         {
             properties.Parse(propertiesNode);
         }
