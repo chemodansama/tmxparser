@@ -36,13 +36,7 @@ namespace Tmx
 {
     ImageLayer::ImageLayer(Tmx::Map *_map)
         : Layer(_map, std::string(), 0, 0, 0, 0, 1.0f, true, TMX_LAYERTYPE_IMAGE_LAYER)
-        , image(NULL)
     {
-    }
-
-    ImageLayer::~ImageLayer()
-    {
-        delete image;
     }
 
     void ImageLayer::Parse(const tinyxml2::XMLNode *imageLayerNode)
@@ -63,7 +57,7 @@ namespace Tmx
 
         if (imageNode)
         {
-            image = new Image();
+            image = std::make_unique<Image>();
             image->Parse(imageNode);
         }
 
@@ -75,5 +69,4 @@ namespace Tmx
             properties.Parse(propertiesNode);
         }
     }
-
 }

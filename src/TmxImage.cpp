@@ -36,10 +36,8 @@ namespace Tmx
         , width()
         , height()
         , transparent_color()
-    {}
-
-    Image::~Image() 
-    {}
+    {
+    }
 
     void Image::Parse(const tinyxml2::XMLNode *imageNode) 
     {

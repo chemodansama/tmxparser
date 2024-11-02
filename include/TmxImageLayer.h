@@ -23,6 +23,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -43,16 +44,15 @@ namespace Tmx
     public:
         /// Construct an ImageLayer on the given map.
         ImageLayer(Tmx::Map *_map);
-        ~ImageLayer();
 
         /// Parse a ImageLayer element.
         void Parse(const tinyxml2::XMLNode *imageLayerNode);
 
         /// Returns a variable containing information
         /// about the image of the ImageLayer.
-        const Tmx::Image* GetImage() const { return image; }
+        const Tmx::Image* GetImage() const { return image.get(); }
 
     private:
-        Tmx::Image* image;
+        std::unique_ptr<Tmx::Image> image;
     };
 }

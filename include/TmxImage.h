@@ -43,7 +43,6 @@ namespace Tmx
     {
     public:
         Image();
-        ~Image();
 
         /// Parses an image element.
         void Parse(const tinyxml2::XMLNode *imageNode);
@@ -58,8 +57,7 @@ namespace Tmx
         int GetHeight() const { return height; }
 
         /// Get the transparent color used in the image. If none is set return a fully transparent color
-        Tmx::Color GetTransparentColor() const
-        { return transparent_color; }
+        Tmx::Color GetTransparentColor() const { return transparent_color; }
 
     private:
         std::string source;
