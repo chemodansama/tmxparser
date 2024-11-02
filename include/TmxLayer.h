@@ -112,6 +112,12 @@ namespace Tmx
         /// Get the type of the layer.
         Tmx::LayerType GetLayerType() const { return layerType; }
 
+        /// Get horizontal parallax
+        float GetParallaxX() const { return parallaxX; }
+
+        /// Get vertical parallax
+        float GetParallaxY() const { return parallaxY; }
+
     protected:
         /// @cond INTERNAL
         Tmx::Map *map;
@@ -127,6 +133,9 @@ namespace Tmx
         bool visible;
         int zOrder;
         int parseOrder;
+
+        float parallaxX{ 1.0f };
+        float parallaxY{ 1.0f };
 
         Tmx::LayerType layerType;
 

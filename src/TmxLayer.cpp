@@ -84,9 +84,17 @@ namespace Tmx
 
     void Layer::Parse(const tinyxml2::XMLNode *layerNode)
     {
-        const tinyxml2::XMLElement *layerElem = layerNode->ToElement();
+        const tinyxml2::XMLElement *layerElement = layerNode->ToElement();
 
-        const auto nameAttribute = layerElem->Attribute("name");
+        const auto nameAttribute = layerElement->Attribute("name");
         name = nameAttribute ? std::string{ nameAttribute } : std::string{};
+
+        const auto intAttribute = [layerElement](const char *name, auto defaultValue) {
+            const auto a = layerElement->Attribute(name);
+            return a ? std::atoi(a) : defaultValue;
+        };
+
+        parallaxX = intAttribute("parallaxx", parallaxX);
+        parallaxY = intAttribute("parallaxy", parallaxY);
     }
 }
