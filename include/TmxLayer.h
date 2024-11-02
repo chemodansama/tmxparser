@@ -53,20 +53,22 @@ namespace Tmx
     //-------------------------------------------------------------------------
     class Layer
     {
-    private:
-        // Prevent copy constructor.
-        Layer(const Layer &_layer);
-
     public:
         /// Construct a new Layer used by a map's objectgroup
         Layer(Tmx::Map *_map, const std::string _name, const int _x, const int _y,
               const int _width, const int _height, const float _opacity, const bool _visible, const LayerType _layerType);
 
-				/// Construct a new layer used by a tile's objectgroup
-				Layer(const Tmx::Tile *_tile, const std::string _name, const int _x, const int _y,
+        /// Construct a new layer used by a tile's objectgroup
+        Layer(const Tmx::Tile *_tile, const std::string _name, const int _x, const int _y,
               const int _width, const int _height, const float _opacity, const bool _visible, const LayerType _layerType);
 
-        virtual ~Layer();
+        Layer(const Layer &source) = delete;
+        Layer &operator=(const Layer &source) = delete;
+
+        Layer(Layer &&source) = default;
+        Layer &operator=(Layer &&source) = default;
+
+        virtual ~Layer() = default;
 
         /// Parse a layer element.
         virtual void Parse(const tinyxml2::XMLNode *layerNode) = 0;
@@ -113,7 +115,7 @@ namespace Tmx
     protected:
         /// @cond INTERNAL
         Tmx::Map *map;
-				const Tmx::Tile *tile;
+        const Tmx::Tile *tile;
         std::string name;
 
         int x;
@@ -124,9 +126,9 @@ namespace Tmx
         float opacity;
         bool visible;
         int zOrder;
-        const int parseOrder;
+        int parseOrder;
 
-        const Tmx::LayerType layerType;
+        Tmx::LayerType layerType;
 
         Tmx::PropertySet properties;
 

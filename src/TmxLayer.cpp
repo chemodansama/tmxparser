@@ -80,7 +80,4 @@ namespace Tmx
     {
         ++nextParseOrder;
     }
-    Layer::~Layer() 
-    {
-    }
 }
