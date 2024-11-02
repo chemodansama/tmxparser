@@ -58,8 +58,7 @@ namespace Tmx
 
         if (imageNode)
         {
-            image = std::make_unique<Image>();
-            image->Parse(imageNode);
+            image = std::make_unique<Image>(imageNode);
         }
 
         // Parse the properties if any.

@@ -122,8 +122,7 @@ namespace Tmx
         const tinyxml2::XMLNode *imageNode = tileNode->FirstChildElement("image");
         if(imageNode)
         {
-            image = new Image();
-            image->Parse(imageNode);
+            image = new Image(imageNode);
         }
 
     }

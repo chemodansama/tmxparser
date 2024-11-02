@@ -28,30 +28,27 @@
 
 #include "TmxImage.h"
 
-namespace Tmx 
-{   
-    Image::Image() 
-        : source()
-        , width()
-        , height()
-        , transparent_color()
+namespace Tmx
+{
+    namespace
+    {
+        auto ParseColor(const tinyxml2::XMLElement *imageElement)
+        {
+            const char *trans = imageElement->Attribute("trans");
+            return trans ? Tmx::Color{ trans } : Tmx::Color{};
+        }
+    }
+
+    Image::Image(const tinyxml2::XMLNode *imageNode)
+        : Image{ imageNode->ToElement() }
     {
     }
 
-    void Image::Parse(const tinyxml2::XMLNode *imageNode) 
+    Image::Image(const tinyxml2::XMLElement *imageElement)
+        : source{ imageElement->Attribute("source") }
+        , width{ imageElement->IntAttribute("width") }
+        , height{ imageElement->IntAttribute("height") }
+        , transparent_color{ ParseColor(imageElement) }
     {
-        const tinyxml2::XMLElement* imageElem = imageNode->ToElement();
-        
-        // Read all the attribute into member variables.
-        source = imageElem->Attribute("source");
-
-        width = imageElem->IntAttribute("width");
-        height = imageElem->IntAttribute("height");
-
-        const char *trans = imageElem->Attribute("trans");
-        if (trans) 
-        {
-            transparent_color = Tmx::Color(trans);
-        }
     }
 }
