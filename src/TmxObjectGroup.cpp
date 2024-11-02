@@ -74,12 +74,9 @@ namespace Tmx
 
     void ObjectGroup::Parse(const tinyxml2::XMLNode *objectGroupNode) 
     {
+        Layer::Parse(objectGroupNode);
+
         const tinyxml2::XMLElement *objectGroupElem = objectGroupNode->ToElement();
-
-        // Read the object group attributes, set to unknown if not defined in XML
-        const auto nameAttribute = objectGroupElem->Attribute("name");
-        name = nameAttribute ? nameAttribute : "unknown";
-
         if (const auto colorAttribute = objectGroupElem->Attribute("color"))
         {
             color = Tmx::Color(colorAttribute);

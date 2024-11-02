@@ -41,11 +41,11 @@ namespace Tmx
 
     void ImageLayer::Parse(const tinyxml2::XMLNode *imageLayerNode)
     {
+        Layer::Parse(imageLayerNode);
+
         const tinyxml2::XMLElement *imageLayerElem = imageLayerNode->ToElement();
 
         // Read all the attributes into local variables.
-        name = imageLayerElem->Attribute("name");
-
         imageLayerElem->QueryIntAttribute("x", &x);
         imageLayerElem->QueryIntAttribute("y", &y);
 

@@ -47,11 +47,11 @@ namespace Tmx {
 
     void GroupLayer::Parse(const tinyxml2::XMLNode *groupLayerNode)
     {
+        Layer::Parse(groupLayerNode);
+
         const tinyxml2::XMLElement *groupLayerElem = groupLayerNode->ToElement();
 
         // Read all the attributes into local variables.
-        name = groupLayerElem->Attribute("name");
-
         groupLayerElem->QueryIntAttribute("x", &x);
         groupLayerElem->QueryIntAttribute("y", &y);
 

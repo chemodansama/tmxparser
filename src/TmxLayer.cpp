@@ -48,7 +48,7 @@ namespace Tmx
 {
     Layer::Layer(Tmx::Map *_map, const std::string _name, const int _x, const int _y, const int _width, const int _height, const float _opacity, const bool _visible, const LayerType _layerType)
         : map(_map)
-				, tile(NULL)
+        , tile(NULL)
         , name(_name)
         , x(_x)
         , y(_y)
@@ -63,9 +63,10 @@ namespace Tmx
     {
         ++nextParseOrder;
     }
-		Layer::Layer(const Tmx::Tile *_tile, const std::string _name, const int _x, const int _y, const int _width, const int _height, const float _opacity, const bool _visible, const LayerType _layerType) 
+
+    Layer::Layer(const Tmx::Tile *_tile, const std::string _name, const int _x, const int _y, const int _width, const int _height, const float _opacity, const bool _visible, const LayerType _layerType) 
         : map(NULL)
-				, tile(_tile)
+        , tile(_tile)
         , name(_name)
         , x(_x)
         , y(_y)
@@ -79,5 +80,13 @@ namespace Tmx
         , properties()
     {
         ++nextParseOrder;
+    }
+
+    void Layer::Parse(const tinyxml2::XMLNode *layerNode)
+    {
+        const tinyxml2::XMLElement *layerElem = layerNode->ToElement();
+
+        const auto nameAttribute = layerElem->Attribute("name");
+        name = nameAttribute ? std::string{ nameAttribute } : std::string{};
     }
 }

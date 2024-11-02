@@ -71,7 +71,7 @@ namespace Tmx
         virtual ~Layer() = default;
 
         /// Parse a layer element.
-        virtual void Parse(const tinyxml2::XMLNode *layerNode) = 0;
+        virtual void Parse(const tinyxml2::XMLNode *layerNode);
 
         /// Get the pointer to the parent map.
         const Tmx::Map *mapGetMap() const { return map; }

@@ -62,11 +62,11 @@ namespace Tmx
 
     void TileLayer::Parse(const tinyxml2::XMLNode *tileLayerNode) 
     {
+        Layer::Parse(tileLayerNode);
+
         const tinyxml2::XMLElement *tileLayerElem = tileLayerNode->ToElement();
     
         // Read the attributes.
-        name = tileLayerElem->Attribute("name");
-
         tileLayerElem->QueryIntAttribute("x", &x);
         tileLayerElem->QueryIntAttribute("y", &y);
 
