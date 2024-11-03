@@ -35,15 +35,6 @@ using std::map;
 
 namespace Tmx
 {
-
-    PropertySet::PropertySet() : properties()
-    {}
-
-    PropertySet::~PropertySet()
-    {
-        properties.clear();
-    }
-
     void PropertySet::Parse(const tinyxml2::XMLNode *propertiesNode, const PropertySet *pattern)
     {
         // Iterate through all of the property nodes.
@@ -141,6 +132,11 @@ namespace Tmx
     {
         if( properties.empty() ) return false;
         return ( properties.find(name) != properties.end() );
+    }
+
+    const std::unordered_map<std::string, Property> &PropertySet::GetPropertyMap() const
+    {
+        return properties;
     }
 
     std::map< std::string, std::string > PropertySet::GetList() const

@@ -45,41 +45,43 @@ namespace Tmx
     class PropertySet
     {
     public:
-        PropertySet();
-        ~PropertySet();
+        PropertySet() = default;
 
         /// Parse a node containing all the property nodes.
         void Parse(const tinyxml2::XMLNode *propertiesNode, const PropertySet *pattern = nullptr);
+
         /// Get a int property.
         int GetIntProperty(const std::string &name, int defaultValue = 0) const;
+
         /// Get a float property.
         float GetFloatProperty(const std::string &name, float defaultValue = 0.0f) const;
+
         /// Get a string property.
         std::string GetStringProperty(const std::string &name, std::string defaultValue = "") const;
+
         /// Get a bool property.
         bool GetBoolProperty(const std::string &name, bool defaultValue = false) const;
+
         /// Get a color property.
-        Tmx::Color GetColorProperty(const std::string &name, Tmx::Color defaultValue = Tmx::Color()) const;
+        Tmx::Color GetColorProperty(const std::string &name, Tmx::Color defaultValue = {}) const;
 
         /// Returns the amount of properties.
         int GetSize() const { return properties.size(); }
 
         /// Checks if a property exists in the set.
-        bool HasProperty( const std::string& name ) const;
+        bool HasProperty(const std::string& name) const;
 
         /// Returns the unordered map of properties.
-        const std::unordered_map< std::string, Property > &GetPropertyMap() const
-        { return properties; }
+        const std::unordered_map<std::string, Property> &GetPropertyMap() const;
 
         /// Returns the STL map of the properties.
         /// Deprecated, please use GetPropertyMap() instead.
-        std::map< std::string, std::string > GetList() const;
+        std::map<std::string, std::string> GetList() const;
 
         /// Returns whether there are no properties.
         bool Empty() const { return properties.empty(); }
 
     private:
-        std::unordered_map< std::string, Property > properties;
-
+        std::unordered_map<std::string, Property> properties;
     };
 }
