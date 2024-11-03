@@ -65,10 +65,7 @@ namespace Tmx
     class Property
     {
     public:
-        Property();
-
-        /// Parse the property element.
-        void Parse(const tinyxml2::XMLElement *propertyElem);
+        Property(const tinyxml2::XMLElement *propertyElem);
 
         /// Get the type of the property (default: TMX_PROPERTY_STRING)
         PropertyType GetType() const { return type; }

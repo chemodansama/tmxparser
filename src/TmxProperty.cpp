@@ -30,63 +30,49 @@
 
 namespace Tmx
 {
-    Property::Property()
-        : type(TMX_PROPERTY_STRING)
+    namespace
     {
+        PropertyType ParsePropertyType(const tinyxml2::XMLElement *property)
+        {
+            const auto typeAttribute = property->FindAttribute("type");
+
+            if (!typeAttribute)
+            {
+                return TMX_PROPERTY_STRING;
+            }
+
+            const auto typeAsCString = typeAttribute->Value();
+            if (!typeAsCString)
+            {
+                return TMX_PROPERTY_STRING;
+            }
+
+            return
+                strcmp(typeAsCString, "string") == 0 ? TMX_PROPERTY_STRING :
+                strcmp(typeAsCString, "bool") == 0   ? TMX_PROPERTY_BOOL :
+                strcmp(typeAsCString, "float") == 0  ? TMX_PROPERTY_FLOAT :
+                strcmp(typeAsCString, "int") == 0    ? TMX_PROPERTY_INT :
+                strcmp(typeAsCString, "color") == 0  ? TMX_PROPERTY_COLOR :
+                strcmp(typeAsCString, "file") == 0   ? TMX_PROPERTY_FILE
+                                                     : TMX_PROPERTY_STRING;
+        }
+
+        std::string ParsePropertyValue(const tinyxml2::XMLElement *property)
+        {
+            if (const char *valueAsCString = property->Attribute("value"))
+            {
+                return valueAsCString;
+            }
+
+            // The value of properties that contain newlines is stored in the element text.
+            const auto text = property->GetText();
+            return text ? text : std::string();
+        }
     }
 
-    void Property::Parse(const tinyxml2::XMLElement *propertyElem)
+    Property::Property(const tinyxml2::XMLElement *propertyElem)
+        : type{ ParsePropertyType(propertyElem) }
+        , value{ ParsePropertyValue(propertyElem) }
     {
-        const tinyxml2::XMLAttribute* typeAttribute = propertyElem->FindAttribute("type");
-
-        if (typeAttribute != nullptr)
-        {
-            const char* typeAsCString = typeAttribute->Value();
-
-            if (strcmp(typeAsCString, "string") == 0)
-            {
-                type = TMX_PROPERTY_STRING;
-            }
-            else if (strcmp(typeAsCString, "bool") == 0)
-            {
-                type = TMX_PROPERTY_BOOL;
-            }
-            else if (strcmp(typeAsCString, "float") == 0)
-            {
-                type = TMX_PROPERTY_FLOAT;
-            }
-            else if (strcmp(typeAsCString, "int") == 0)
-            {
-                type = TMX_PROPERTY_INT;
-            }
-            else if (strcmp(typeAsCString, "color") == 0)
-            {
-                type = TMX_PROPERTY_COLOR;
-            }
-            else if (strcmp(typeAsCString, "file") == 0)
-            {
-                type = TMX_PROPERTY_FILE;
-            }
-            else
-            {
-                type = TMX_PROPERTY_STRING;
-            }
-        }
-        else
-        {
-            type = TMX_PROPERTY_STRING;
-        }
-
-        const char* valueAsCString = propertyElem->Attribute("value");
-        if (valueAsCString)
-        {
-            value = valueAsCString;
-        }
-        else
-        {
-            // The value of properties that contain newlines is stored in the element text.
-            valueAsCString = propertyElem->GetText();
-            value = valueAsCString ? valueAsCString : std::string(); 
-        }
     }
 }

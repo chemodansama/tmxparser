@@ -62,9 +62,7 @@ namespace Tmx
             }
 
             // Read the attributes of the property and add it to the map
-            Property property;
-            property.Parse(propertyElem);
-            properties[nameAttrib->Value()] = property;
+            properties.emplace(nameAttrib->Value(), Property{ propertyElem });
 
             //propertyNode = propertiesNode->IterateChildren("property", propertyNode); FIXME MAYBE
             propertyNode = propertyNode->NextSiblingElement("property");
