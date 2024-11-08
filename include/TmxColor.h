@@ -57,10 +57,7 @@ namespace Tmx
         Color& operator=(const Color&) = default;
 
         /// Check if two colors have the exact same four components.
-        bool operator==(const Color& o) { return color == o.color; }
-
-        /// Check if two colors are different.
-        bool operator!=(const Color& o) { return color != o.color; }
+        bool operator==(const Color& o) const { return color == o.color; }
 
         /// Get the alpha component of the color.
         uint8_t GetAlpha() const;
