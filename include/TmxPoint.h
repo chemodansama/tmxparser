@@ -27,6 +27,8 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+#include <string_view>
+
 namespace Tmx
 {
     //-------------------------------------------------------------------------
@@ -36,5 +38,9 @@ namespace Tmx
     {
         float x; ///< X coordinate
         float y; ///< Y coordinate
+
+        bool operator==(const Point &rhs) const;
     };
+
+    Point ParsePoint(std::string_view s);
 }
