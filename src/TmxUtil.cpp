@@ -62,6 +62,16 @@ namespace Tmx {
         return ltrim(rtrim(s));
     }
 
+    int Util::CountChildren(const tinyxml2::XMLElement *parent, const char *name)
+    {
+        int result{ 0 };
+        for (auto e = parent->FirstChildElement(name); e; e = e->NextSiblingElement(name))
+        {
+            result += 1;
+        }
+        return result;
+    }
+
     std::string &Util::Trim(std::string &str)
     {
         return trim( str );

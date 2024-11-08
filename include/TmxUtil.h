@@ -28,11 +28,26 @@
 #pragma once
 
 #include <string>
+#include <string_view>
+
+#include <tinyxml2.h>
 
 namespace Tmx 
 {
     namespace Util
     {
+        template <typename T>
+        void Iterate(const std::string_view &s, const char separator, T &&callback);
+
+        int CountChildren(const tinyxml2::XMLElement *parent, const char *name);
+
+        template <typename T>
+        void IterateChildren(const tinyxml2::XMLElement *parent, const char *name, T &&callback);
+
+        template <typename T>
+        auto ParseOrDefault(const tinyxml2::XMLElement *data, const char *attributeName,
+            T &&parser, decltype(T{}(nullptr)) defaultValue = {});
+
         /// Trim both leading and trailing whitespace from a string.
         std::string &Trim(std::string &str);
 
@@ -41,5 +56,43 @@ namespace Tmx
 
         /// Decompress a gzip encoded byte array.
         char* DecompressGZIP(const char *data, int dataSize, int expectedSize);
+
+        template <typename T>
+        auto ParseOrDefault(const tinyxml2::XMLElement *data, const char *attributeName,
+            T &&parser, decltype(T{}(nullptr)) defaultValue)
+        {
+            const auto s = data->FindAttribute(attributeName)
+                ? data->Attribute(attributeName)
+                : nullptr;
+
+            return s ? parser(s) : defaultValue;
+        }
+
+        // Template implementation
+        template <typename T>
+        void Iterate(const std::string_view &s, const char separator, T &&callback)
+        {
+            if (s.empty()) {
+                return;
+            }
+
+            size_t left = 0;
+            for (auto it = s.find(separator); it != std::string::npos; it = s.find(separator, left))
+            {
+                callback(s.data() + left, s.data() + it);
+                left = it + 1;
+            }
+
+            callback(s.data() + left, s.data() + s.size());
+        }
+
+        template <typename T>
+        void IterateChildren(const tinyxml2::XMLElement *parent, const char *name, T &&callback)
+        {
+            for (auto e = parent->FirstChildElement(name); e; e = e->NextSiblingElement(name))
+            {
+                callback(e);
+            }
+        }
     }
 }
