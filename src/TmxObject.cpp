@@ -126,6 +126,7 @@ namespace Tmx
         , polygon{ ParsePrimitive(data->FirstChildElement("polygon"), pattern->polygon.get()) }
         , polyline{ ParsePrimitive(data->FirstChildElement("polyline"), pattern->polyline.get()) }
         , text{ ParsePrimitive(data->FirstChildElement("text"), pattern->text.get()) }
+        , properties{ data->FirstChildElement("properties") }
     {
     }
 }

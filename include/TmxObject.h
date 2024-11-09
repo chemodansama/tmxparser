@@ -71,7 +71,7 @@ namespace Tmx
         int GetHeight() const { return height; }
 
         /// Get the rotation of the object, in degrees.
-        double GetRot() const { return rotation; }
+        float GetRot() const { return rotation; }
 
         /// Get the Global ID of the tile associated with this object.
         int GetGid() const { return gid; }
@@ -110,7 +110,7 @@ namespace Tmx
         int gid{ 0 };
         int id{ 0 };
 
-        double rotation{ 0.0f };
+        float rotation{ 0.0f };
         bool visible{ true };
 
         std::unique_ptr<Tmx::Ellipse> ellipse;

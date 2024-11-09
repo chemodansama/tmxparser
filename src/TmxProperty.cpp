@@ -74,7 +74,7 @@ namespace Tmx
     Property::Property(const tinyxml2::XMLElement *data)
         : type{ ParsePropertyType(data) }
     {
-        const auto valueString = ParsePropertyValue(data);
+        auto valueString = ParsePropertyValue(data);
         isEmpty = valueString.empty();
 
         switch (type)
@@ -87,7 +87,7 @@ namespace Tmx
 
             case TMX_PROPERTY_BOOL:
             {
-                value = valueString.compare("true") == 0;
+                value = valueString == "true";
                 break;
             }
 

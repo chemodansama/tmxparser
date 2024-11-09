@@ -87,7 +87,7 @@ namespace Tmx
         : properties{ ParsePropertiesMap(propertiesNode, pattern) }
     {
     }
-		
+
     const std::string &PropertySet::GetStringProperty(const std::string &name,
         const std::string &defaultValue) const
     {
