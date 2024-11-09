@@ -42,6 +42,23 @@ namespace Tmx
 {
     class Image;
 
+    namespace TilesetDetails
+    {
+        class TilesetData
+        {
+        public:
+            TilesetData(const std::string &path, const tinyxml2::XMLElement *data);
+
+            const tinyxml2::XMLElement *data{ nullptr };
+            std::string filePath;
+
+            const tinyxml2::XMLElement *operator->() const { return data; }
+
+        private:
+            tinyxml2::XMLDocument doc;
+        };
+    }
+
     //-------------------------------------------------------------------------
     /// A class used for storing information about each of the tilesets.
     /// A tileset is a collection of tiles, of whom each may contain properties.
@@ -50,7 +67,7 @@ namespace Tmx
     class Tileset 
     {
     public:
-        Tileset(const std::string &file_path, const tinyxml2::XMLNode *tilesetNode);
+        Tileset(const std::string &file_path, const tinyxml2::XMLElement *data);
 
         /// Returns the global id of the first tile.
         int GetFirstGid() const { return first_gid; }
@@ -95,17 +112,19 @@ namespace Tmx
         const Tmx::PropertySet &GetProperties() const { return properties; }
 
     private:
+        Tileset(TilesetDetails::TilesetData data, int firstGid);
+
         int first_gid;
         std::string file_path;
 
         std::string name;
         
-        int tile_width;
-        int tile_height;
-        int margin;
-        int spacing;
-        int tile_count;
-        int columns;
+        int tile_width{ 0 };
+        int tile_height{ 0 };
+        int margin{ 0 };
+        int spacing{ 0 };
+        int tile_count{ 0 };
+        int columns{ 0 };
         
         Tmx::TileOffset tileOffset;
         std::unique_ptr<Tmx::Image> image;

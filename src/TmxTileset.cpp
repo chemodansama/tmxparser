@@ -42,101 +42,92 @@ namespace Tmx
         {
             return data ? std::make_unique<Image>(data) : nullptr;
         }
+
+        auto GetFolderName(const std::string &filename)
+        {
+            auto it = filename.find_last_of("/\\");
+            if (it != std::string::npos)
+            {
+                it += 1;
+            }
+            return filename.substr(0, it);
+        }
     }
 
-    Tileset::Tileset(const std::string &file_path, const tinyxml2::XMLNode *tilesetNode)
-        : first_gid(0)
-        , name()
-        , tile_width(0)
-        , tile_height(0)
-        , margin(0)
-        , spacing(0)
-        , tile_count(0)
-        , columns(0)
-        , tileOffset{ tilesetNode->FirstChildElement("tileoffset") }
-        , image{ CreateImage(tilesetNode->FirstChildElement("image")) }
-        , tiles()
-        , properties{ tilesetNode->FirstChildElement("properties") }
+    namespace TilesetDetails
     {
-        const tinyxml2::XMLElement *tilesetElem = tilesetNode->ToElement();
-
-        // Read all the attributes into local variables.
-
-        // The firstgid and source attribute are kept in the TMX map,
-        // since they are map specific.
-        first_gid = tilesetElem->IntAttribute("firstgid");
-
-        // If the <tileset> node contains a 'source' tag,
-        // the tileset config should be loaded from an external
-        // TSX (Tile Set XML) file. That file has the same structure
-        // as the <tileset> element in the TMX map.
-        const char* source_name = tilesetElem->Attribute("source");
-        tinyxml2::XMLDocument tileset_doc;
-        if ( source_name )
+        TilesetData::TilesetData(const std::string &path, const tinyxml2::XMLElement *data)
         {
-            for (const auto &fileName : { file_path + source_name, std::string{ source_name } })
+            const char *source = data->Attribute("source");
+            if (!source)
             {
-                auto it = fileName.find_last_of("/\\");
-                if (it != std::string::npos)
-                {
-                    it += 1;
-                }
+                filePath = path;
+                this->data = data;
+                return;
+            }
 
-                this->file_path = fileName.substr(0, it);
-
-                tileset_doc.LoadFile( fileName.c_str() );
-                if (tileset_doc.ErrorID() == 0)
+            for (const auto &fileName : { path + source, std::string{ source } })
+            {
+                doc.LoadFile( fileName.c_str() );
+                if (doc.ErrorID() == 0)
                 {
+                    filePath = GetFolderName(fileName);
                     break;
                 }
             }
 
-            if ( tileset_doc.ErrorID() != 0)
+            if (doc.ErrorID() != 0)
             {
-                fprintf(stderr, "failed to load tileset file '%s'\n", source_name);
+                fprintf(stderr, "failed to load tileset file '%s'\n", source);
                 return;
             }
 
             // Update node and element references to the new node
-            tilesetNode = tileset_doc.FirstChildElement("tileset");
-            assert(tilesetNode); //RJCB
-
-            tilesetElem = tilesetNode->ToElement();
-        }
-        else
-        {
-            this->file_path = file_path;
-        }
-
-        tile_width = tilesetElem->IntAttribute("tilewidth");
-        tile_height = tilesetElem->IntAttribute("tileheight");
-        margin = tilesetElem->IntAttribute("margin");
-        spacing = tilesetElem->IntAttribute("spacing");
-        tile_count = tilesetElem->IntAttribute("tilecount");
-        columns = tilesetElem->IntAttribute("columns");
-        name = tilesetElem->Attribute("name");
-
-        // Parse the terrain types if any.
-        if (const auto terrainTypesNode = tilesetNode->FirstChildElement("terraintypes"))
-        {
-             TerrainArray::Parse(&terrainTypes, terrainTypesNode);
-        }
-
-        // Iterate through all of the tile elements and parse each.
-        auto tileNode = tilesetNode->FirstChildElement("tile");
-        for (int tId = 0; tileNode; ++tId)
-        {
-            tiles.emplace_back(tileNode);
-            tileNode = tileNode->NextSiblingElement("tile");
+            this->data = doc.FirstChildElement("tileset");
+            assert(this->data); //RJCB
         }
     }
 
-    const Tile *Tileset::GetTile(int index) const
+    Tileset::Tileset(const std::string &file_path, const tinyxml2::XMLElement *data)
+        : Tileset{ { file_path, data }, data->IntAttribute("firstgid") }
     {
-        for (size_t i = 0; i < tiles.size(); ++i)
+    }
+
+    Tileset::Tileset(TilesetDetails::TilesetData data, int firstGid)
+        : first_gid{ firstGid }
+        , file_path{ std::move(data.filePath) }
+        , name{ data->Attribute("name") }
+        , tile_width{ data->IntAttribute("tilewidth") }
+        , tile_height{ data->IntAttribute("tileheight") }
+        , margin{ data->IntAttribute("margin") }
+        , spacing{ data->IntAttribute("spacing") }
+        , tile_count{ data->IntAttribute("tilecount") }
+        , columns{ data->IntAttribute("columns") }
+        , tileOffset{ data->FirstChildElement("tileoffset") }
+        , image{ CreateImage(data->FirstChildElement("image")) }
+        , properties{ data->FirstChildElement("properties") }
+    {
+        // Parse the terrain types if any.
+        if (const auto terrainTypesNode = data->FirstChildElement("terraintypes"))
         {
-            if (tiles.at(i).GetId() == index)
-                return &tiles.at(i);
+            TerrainArray::Parse(&terrainTypes, terrainTypesNode);
+        }
+
+        // Iterate through all of the tile elements and parse each.
+        for (auto e = data->FirstChildElement("tile"); e; e = e->NextSiblingElement("tile"))
+        {
+            tiles.emplace_back(e);
+        }
+    }
+
+    const Tile *Tileset::GetTile(const int index) const
+    {
+        for (const auto &t : tiles)
+        {
+            if (t.GetId() == index)
+            {
+                return &t;
+            }
         }
 
         return nullptr;
