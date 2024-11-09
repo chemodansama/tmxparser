@@ -45,13 +45,11 @@ namespace Tmx
             constexpr auto const property = "property";
             for (auto n = node->FirstChildElement(property); n; n = n->NextSiblingElement(property))
             {
-                const auto e = n->ToElement();
-
-                const auto nameAttrib = e->FindAttribute("name");
+                const auto nameAttrib = n->FindAttribute("name");
                 if (nameAttrib && nameAttrib->Value()[0] != 0)
                 {
                     // Read the attributes of the property and add it to the map
-                    properties.emplace(nameAttrib->Value(), Property{ e });
+                    properties.emplace(nameAttrib->Value(), Property{ n });
                 }
             }
 

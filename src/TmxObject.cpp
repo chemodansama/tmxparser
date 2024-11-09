@@ -105,6 +105,12 @@ namespace Tmx
         }
     }
 
+    Object::Object()
+        : properties{ nullptr }
+    {
+
+    }
+
     Object::Object(const tinyxml2::XMLElement *data, Map *map)
         : Object{ data, GetOrLoadPattern(map, ParseTemplateName(data)) }
     {

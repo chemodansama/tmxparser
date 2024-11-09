@@ -235,6 +235,7 @@ namespace Tmx
         : has_error{ true }
         , error_code{ TMX_PARSING_ERROR }
         , error_text{ std::move(errorText) }
+        , properties{ nullptr }
     {
     }
 

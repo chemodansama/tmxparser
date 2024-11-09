@@ -45,7 +45,7 @@ namespace Tmx
     class PropertySet
     {
     public:
-        PropertySet(const tinyxml2::XMLNode *propertiesNode = nullptr,
+        PropertySet(const tinyxml2::XMLNode *propertiesNode,
             const PropertySet *pattern = nullptr);
 
         /// Get a int property.

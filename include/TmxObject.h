@@ -49,7 +49,7 @@ namespace Tmx
     class Object
     {
     public:
-        Object() = default;
+        Object();
         Object(const tinyxml2::XMLElement *data, Map *map);
 
         /// Get the name of the object.
