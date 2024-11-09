@@ -39,11 +39,6 @@ namespace Tmx
         }
     }
 
-    Image::Image(const tinyxml2::XMLNode *imageNode)
-        : Image{ imageNode->ToElement() }
-    {
-    }
-
     Image::Image(const tinyxml2::XMLElement *imageElement)
         : source{ imageElement->Attribute("source") }
         , width{ imageElement->IntAttribute("width") }

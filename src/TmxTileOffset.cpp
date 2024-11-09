@@ -30,20 +30,9 @@
 
 namespace Tmx 
 {   
-    TileOffset::TileOffset() 
-        : x(0)
-        , y(0)
-    {}
-
-    TileOffset::~TileOffset() 
-    {}
-
-    void TileOffset::Parse(const tinyxml2::XMLNode *tileOffsetNode) 
+    TileOffset::TileOffset(const tinyxml2::XMLElement *data)
+        : x{ data ? data->IntAttribute("x") : 0 }
+        , y{ data ? data->IntAttribute("y") : 0 }
     {
-        const tinyxml2::XMLElement* tileOffsetElem = tileOffsetNode->ToElement();
-        
-        // Read all the attribute into member variables.
-        tileOffsetElem->QueryIntAttribute("x", &x);
-        tileOffsetElem->QueryIntAttribute("y", &y);
     }
 }

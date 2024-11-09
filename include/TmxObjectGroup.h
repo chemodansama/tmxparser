@@ -48,24 +48,16 @@ namespace Tmx
     {
     public:
         /// Construct a new ObjectGroup
-        ObjectGroup(Tmx::Map *_map);
+        ObjectGroup(Tmx::Map *_map, const tinyxml2::XMLElement *data);
 
         /// Construct a new ObjectGroup used by a Tile
-        ObjectGroup(const Tmx::Tile *_tile);
+        ObjectGroup(const Tmx::Tile *_tile, const tinyxml2::XMLElement *data);
 
-        ObjectGroup(const ObjectGroup &) = delete;
-        ObjectGroup& operator=(const ObjectGroup &) = delete;
-
-        ObjectGroup(ObjectGroup &&source) noexcept;
-        ObjectGroup &operator=(ObjectGroup &&source) noexcept;
-
-        ~ObjectGroup();
-
-        /// Parse an objectgroup node.
-        void Parse(const tinyxml2::XMLNode *objectGroupNode);
+        ObjectGroup(ObjectGroup &&) = default;
+        ObjectGroup& operator=(ObjectGroup &&) = default;
 
         /// Get a single object.
-        const Tmx::Object *GetObject(int index) const { return objects.at(index); }
+        const Tmx::Object &GetObject(int index) const { return objects.at(index); }
 
         /// Get the number of objects in the list.
         int GetNumObjects() const { return objects.size(); }
@@ -74,10 +66,10 @@ namespace Tmx
         Tmx::Color GetColor() const { return color; }
 
         /// Get the whole list of objects.
-        const std::vector<Tmx::Object*> &GetObjects() const { return objects; }
+        const std::vector<Tmx::Object> &GetObjects() const { return objects; }
 
     private:
         Tmx::Color color;
-        std::vector<Tmx::Object*> objects;
+        std::vector<Tmx::Object> objects;
     };
 }

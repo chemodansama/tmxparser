@@ -27,6 +27,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+#include <string_view>
 #include <vector>
 
 #include <tinyxml2.h>
@@ -41,10 +42,8 @@ namespace Tmx
     class Polyline
     {
     public:
-        Polyline();
-
-        /// Parse the polyline node.
-        void Parse(const tinyxml2::XMLNode *polylineNode);
+        Polyline(const tinyxml2::XMLElement *data);
+        Polyline(const std::string_view &data);
 
         /// Get one of the vertices.
         const Tmx::Point &GetPoint(int index) const { return points[index]; }

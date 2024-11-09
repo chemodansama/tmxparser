@@ -28,35 +28,17 @@
 
 #include "TmxTerrainArray.h"
 
-#include <cstdlib>
-
-#include "TmxTerrain.h"
-
-using std::string;
-using std::map;
-
 namespace Tmx
 {
-    TerrainArray::TerrainArray()
-    {}
-
-    TerrainArray::~TerrainArray()
-    {
-    }
-
-    void TerrainArray::Parse(std::vector< Tmx::Terrain* > *terrainTypes, const tinyxml2::XMLNode *terrainArrayNode)
+    void TerrainArray::Parse(std::vector<Tmx::Terrain> *terrainTypes,
+        const tinyxml2::XMLElement *data)
     {
         // Iterate through all of the terrain nodes.
-        const tinyxml2::XMLNode *terrainNode = terrainArrayNode->FirstChildElement("terrain");
-
-        while (terrainNode)
+        for (auto terrainNode = data->FirstChildElement("terrain"); terrainNode;
+            terrainNode = terrainNode->NextSiblingElement("terrain"))
         {
             // Read the attributes of the terrain and add it the terrainTypes vector.
-            Terrain *terrainType = new Terrain();
-            terrainType->Parse(terrainNode);
-            terrainTypes->push_back(terrainType);
-
-            terrainNode = terrainNode->NextSiblingElement("terrain");
+            terrainTypes->emplace_back(terrainNode);
         }
     }
 }

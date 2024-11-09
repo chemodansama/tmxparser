@@ -38,116 +38,94 @@ namespace Tmx
 {
     namespace
     {
-        template <typename T, typename... Args>
-        auto ParsePrimitive(const tinyxml2::XMLNode *node, const T* patternPrimitive,
-            T** primitive, Args&&... args)
+        const auto *GetDefaultPattern()
         {
-            if (node || patternPrimitive)
-            {
-                delete *primitive;
-
-                if (node)
-                {
-                    *primitive = new T(std::forward<Args>(args)...);
-                    (*primitive)->Parse(node);
-                }
-                else
-                {
-                    *primitive = new T(*patternPrimitive);
-                }
-            }
+            static Object defaultPattern;
+            return &defaultPattern;
         }
-    }
 
-    Object::Object()
-        : name()
-        , type()
-        , x(0)
-        , y(0)
-        , width(0)
-        , height(0)
-        , gid(0)
-        , id(0)
-        , rotation(0.0)
-        , visible(true)
-        , ellipse(0)
-        , polygon(0)
-        , polyline(0)
-        , text(0)
-        , properties()
-    {
-    }
-
-    Object::~Object()
-    {
-        delete ellipse;
-        delete polygon;
-        delete polyline;
-        delete text;
-    }
-
-    void Object::Parse(const tinyxml2::XMLNode *objectNode, Map *map)
-    {
-        const tinyxml2::XMLElement *objectElem = objectNode->ToElement();
-
-        static const Object defaultPattern;
-        const Object *pattern = &defaultPattern;
-
-        const char *templateName{ nullptr };
-        objectElem->QueryStringAttribute("template", &templateName);
-        if (templateName)
+        auto GetAttribute(const tinyxml2::XMLElement *element, const char *name,
+            const std::string &defaultValue)
         {
-            auto templates = map->GetTemplates();
+            const auto value = element->Attribute(name);
+            return value ? std::string{ value } : defaultValue;
+        }
+
+        const auto *GetOrLoadPattern(Map *map, const std::string &templateName)
+        {
+            if (templateName.empty())
+            {
+                return GetDefaultPattern();
+            }
+
+            auto &templates = map->GetTemplates();
             auto it = templates.find(templateName);
             if (it == templates.end())
             {
-                std::string fileName = map->GetFilepath() + templateName;
                 tinyxml2::XMLDocument doc;
+
+                const auto fileName = map->GetFilepath() + templateName;
                 doc.LoadFile(fileName.c_str());
 
-                auto o = new Object();
-                o->Parse(doc.FirstChildElement("template")->FirstChildElement("object"), map);
-                pattern = templates.emplace(templateName, o).first->second;
+                if (doc.Error())
+                {
+                    return GetDefaultPattern();
+                }
+
+                const auto &templateData =
+                    doc.FirstChildElement("template")->FirstChildElement("object");
+                it = templates.emplace(templateName, Object{ templateData, map }).first;
             }
-            else
+
+            return &it->second;
+        }
+
+        auto ParseTemplateName(const tinyxml2::XMLElement *data)
+        {
+            const char *templateName{ nullptr };
+            data->QueryStringAttribute("template", &templateName);
+            return templateName ? std::string{ templateName } : std::string{};
+        }
+
+        template <typename T, typename... Args>
+        std::unique_ptr<T> ParsePrimitive(const tinyxml2::XMLElement *data, const T *pattern,
+            Args&&... args)
+        {
+            if (data)
             {
-                pattern = it->second;
+                return std::make_unique<T>(data, std::forward<Args>(args)...);
             }
+
+            if (pattern)
+            {
+                return std::make_unique<T>(*pattern);
+            }
+
+            return {};
         }
+    }
 
-        // Read the attributes of the object.
-        const char *tempName = objectElem->Attribute("name");
-        const char *tempType = objectElem->Attribute("type");
+    Object::Object(const tinyxml2::XMLElement *data, Map *map)
+        : Object{ data, GetOrLoadPattern(map, ParseTemplateName(data)) }
+    {
+    }
 
-        name = tempName ? tempName : pattern->name;
-        type = tempType ? tempType : pattern->type;
-
-        id = objectElem->IntAttribute("id");
-        x = objectElem->IntAttribute("x", pattern->x);
-        y = objectElem->IntAttribute("y", pattern->y);
-        width = objectElem->IntAttribute("width", pattern->width);
-        height = objectElem->IntAttribute("height", pattern->height);
-        gid = objectElem->IntAttribute("gid");
-        rotation = objectElem->IntAttribute("rotation", pattern->rotation);
-        if (objectElem->QueryBoolAttribute("visible", &visible) != tinyxml2::XML_SUCCESS)
-        {
-            visible = pattern->visible;
-        }
-
-        // Read the ellipse of the object if there are any.
-        ParsePrimitive(objectNode->FirstChildElement("ellipse"), pattern->ellipse, &ellipse,
-            x, y, width, height);
-
-        // Read the Polygon and Polyline of the object if there are any.
-        ParsePrimitive(objectNode->FirstChildElement("polygon"), pattern->polygon, &polygon);
-        ParsePrimitive(objectNode->FirstChildElement("polyline"), pattern->polyline, &polyline);
-        ParsePrimitive(objectNode->FirstChildElement("text"), pattern->text, &text);
-
-        // Read the properties of the object.
-        const tinyxml2::XMLNode *propertiesNode = objectNode->FirstChildElement("properties");
-        if (propertiesNode)
-        {
-            properties.Parse(propertiesNode, &pattern->properties);
-        }
+    Object::Object(const tinyxml2::XMLElement *data, const Tmx::Object *pattern)
+        : name{ GetAttribute(data, "name", pattern->name) }
+        , type{ GetAttribute(data, "type", pattern->type) }
+        , x{ data->IntAttribute("x", pattern->x) }
+        , y{ data->IntAttribute("y", pattern->y) }
+        , width{ data->IntAttribute("width", pattern->width) }
+        , height{ data->IntAttribute("height", pattern->height) }
+        , gid{ data->IntAttribute("gid") }
+        , id{ data->IntAttribute("id") }
+        , rotation{ data->FloatAttribute("rotation", pattern->rotation) }
+        , visible{ data->BoolAttribute("visible", pattern->visible) }
+        , ellipse{ ParsePrimitive(data->FirstChildElement("ellipse"), pattern->ellipse.get(), x, y,
+            width, height) }
+        , polygon{ ParsePrimitive(data->FirstChildElement("polygon"), pattern->polygon.get()) }
+        , polyline{ ParsePrimitive(data->FirstChildElement("polyline"), pattern->polyline.get()) }
+        , text{ ParsePrimitive(data->FirstChildElement("text"), pattern->text.get()) }
+    {
     }
 }

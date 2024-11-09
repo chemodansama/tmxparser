@@ -39,26 +39,16 @@ namespace Tmx
     class Terrain
     {
     public:
-        Terrain();
-        ~Terrain();
-
-        /// Parse a terrain type node.
-        void Parse(const tinyxml2::XMLNode *terrainNode);
+        Terrain(const tinyxml2::XMLElement *data);
 
         /// Get the name of the terrain type.
         const std::string &GetName() const { return name; }
 
         /// Get the local tile-id of the tile that represents the terrain type visually.
-        int GetTileId() const
-        {
-            return tileID;
-        }
+        int GetTileId() const { return tileID; }
 
         /// Get a set of properties regarding the terrain type.
-        const Tmx::PropertySet &GetProperties() const
-        {
-            return properties;
-        }
+        const Tmx::PropertySet &GetProperties() const { return properties; }
 
     private:
         std::string name;

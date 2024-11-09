@@ -28,7 +28,7 @@
 
 #include "TmxMap.h"
 
-#include <cstdio>
+#include <cassert>
 
 #include <tinyxml2.h>
 
@@ -38,153 +38,156 @@
 #include "TmxObjectGroup.h"
 #include "TmxTileLayer.h"
 #include "TmxTileset.h"
-
-using std::vector;
-using std::string;
+#include "TmxUtil.h"
 
 namespace Tmx
 {
-    Map::Map()
-        : file_name()
-        , file_path()
-        , background_color()
-        , version(0.0)
-        , orientation(TMX_MO_ORTHOGONAL)
-        , render_order(TMX_RIGHT_DOWN)
-        , stagger_axis(TMX_SA_NONE)
-        , stagger_index(TMX_SI_NONE)
-        , width(0)
-        , height(0)
-        , tile_width(0)
-        , tile_height(0)
-        , next_object_id(0)
-        , hexside_length(0)
-        , layers()
-        , tile_layers()
-        , object_groups()
-        , group_layers()
-        , tilesets()
-        , has_error(false)
-        , error_code(0)
-        , error_text()
-    {}
-
-    Map::~Map()
+    namespace
     {
-        // Iterate through all of the object groups and delete each of them.
-        vector< ObjectGroup* >::iterator ogIter;
-        for (ogIter = object_groups.begin(); ogIter != object_groups.end(); ++ogIter)
+        auto GetFilePath(const std::string &fileName)
         {
-            ObjectGroup *objectGroup = (*ogIter);
+            const int lastSlash = fileName.find_last_of("/");
 
-            if (objectGroup)
-            {
-                delete objectGroup;
-                objectGroup = NULL;
-            }
+            // Get the directory of the file using substring.
+            return lastSlash > 0
+                ? fileName.substr(0, lastSlash + 1)
+                : std::string{};
         }
 
-        // Iterate through all of the tile layers and delete each of them.
-        vector< TileLayer* >::iterator tlIter;
-        for (tlIter = tile_layers.begin(); tlIter != tile_layers.end(); ++tlIter)
+        auto GetMapElement(const tinyxml2::XMLDocument *doc)
         {
-            TileLayer *layer = (*tlIter);
-
-            if (layer)
-            {
-                delete layer;
-                layer = NULL;
-            }
+            return doc->FirstChildElement("map");
         }
 
-        // Iterate through all of the image layers and delete each of them.
-        vector< ImageLayer* >::iterator ilIter;
-        for (ilIter = image_layers.begin(); ilIter != image_layers.end(); ++ilIter)
+        auto GetStringAttribute(const tinyxml2::XMLElement *data, const char *attribute)
         {
-            ImageLayer *layer = (*ilIter);
-
-            if (layer)
+            if (const auto s = data->Attribute(attribute))
             {
-                delete layer;
-                layer = NULL;
+                return std::string_view{ s };
             }
+
+            return std::string_view{};
         }
 
-        // Iterate through all of the tilesets and delete each of them.
-        vector< Tileset* >::iterator tsIter;
-        for (tsIter = tilesets.begin(); tsIter != tilesets.end(); ++tsIter)
+        auto ParseOrientation(const tinyxml2::XMLElement *data)
         {
-            Tileset *tileset = (*tsIter);
+            const auto attribute = GetStringAttribute(data, "orientation");
 
-            if (tileset)
-            {
-                delete tileset;
-                tileset = NULL;
-            }
+            return
+                attribute == "orthogonal" ? TMX_MO_ORTHOGONAL :
+                attribute == "isometric"  ? TMX_MO_ISOMETRIC :
+                attribute == "staggered"  ? TMX_MO_STAGGERED :
+                attribute == "hexagonal"  ? TMX_MO_HEXAGONAL
+                                          : TMX_MO_ORTHOGONAL;
         }
 
-        vector< GroupLayer* >::iterator glIter;
-        for (glIter = group_layers.begin(); glIter != group_layers.end(); ++glIter)
+        auto ParseRenderOrder(const tinyxml2::XMLElement *data)
         {
-            GroupLayer *grouplayer = (*glIter);
-            if(grouplayer) {
-              delete grouplayer;
-              grouplayer = NULL;
-            }
+            const auto attribute = GetStringAttribute(data, "renderorder");
+
+            return
+                attribute == "right-down" ? TMX_RIGHT_DOWN :
+                attribute == "right-up"   ? TMX_RIGHT_UP :
+                attribute == "left-down"  ? TMX_LEFT_DOWN :
+                attribute == "left-up"    ? TMX_LEFT_UP
+                                          : TMX_RIGHT_DOWN;
+        }
+
+        auto ParseStaggerAxis(const tinyxml2::XMLElement *data)
+        {
+            const auto attribute = GetStringAttribute(data, "staggeraxis");
+
+            return
+                attribute == "x" ? TMX_SA_X :
+                attribute == "y" ? TMX_SA_Y
+                                 : TMX_SA_NONE;
+        }
+
+        auto ParseStaggerIndex(const tinyxml2::XMLElement *data)
+        {
+            const auto attribute = GetStringAttribute(data, "staggerindex");
+
+            return
+                attribute == "even" ? TMX_SI_EVEN :
+                attribute == "odd"  ? TMX_SI_ODD
+                                    : TMX_SI_NONE;
         }
     }
 
-    void Map::ParseFile(const string &fileName)
+    Map Map::ParseFile(const std::string &fileName)
     {
-        file_name = fileName;
-
-        int lastSlash = fileName.find_last_of("/");
-
-        // Get the directory of the file using substring.
-        if (lastSlash > 0)
-        {
-            file_path = fileName.substr(0, lastSlash + 1);
-        }
-        else
-        {
-            file_path = "";
-        }
-
-        // Create a tiny xml document and use it to parse the text.
         tinyxml2::XMLDocument doc;
-        doc.LoadFile( fileName.c_str() );
+        doc.LoadFile(fileName.c_str());
 
-        // Check for parsing errors.
-        if (doc.Error())
-        {
-            has_error = true;
-            error_code = TMX_PARSING_ERROR;
-            error_text = doc.ErrorStr();
-            return;
-        }
-
-        tinyxml2::XMLNode *mapNode = doc.FirstChildElement("map");
-        Parse( mapNode );
+        return doc.Error()
+            ? Map{ doc.ErrorStr() }
+            : Map{ GetMapElement(&doc), GetFilePath(fileName)};
     }
 
-    void Map::ParseText(const string &text, const std::string &path)
+    Map Map::ParseText(const std::string &text, const std::string &path)
     {
-        file_path = path;
         // Create a tiny xml document and use it to parse the text.
         tinyxml2::XMLDocument doc;
         doc.Parse(text.c_str());
 
-        // Check for parsing errors.
-        if (doc.Error())
-        {
-            has_error = true;
-            error_code = TMX_PARSING_ERROR;
-            error_text = doc.ErrorStr();
-            return;
-        }
+        return doc.Error()
+            ? Map{ doc.ErrorStr() }
+            : Map{ GetMapElement(&doc), path };
+    }
 
-        tinyxml2::XMLNode *mapNode = doc.FirstChildElement("map");
-        Parse( mapNode );
+    const Tmx::Layer *Map::GetLayer(int index) const
+    {
+        return layers.at(index);
+    }
+
+    int Map::GetNumLayers() const
+    {
+        return layers.size();
+    }
+
+    const Tmx::TileLayer *Map::GetTileLayer(int index) const
+    {
+        return &tile_layers.at(index);
+    }
+
+    int Map::GetNumTileLayers() const
+    {
+        return tile_layers.size();
+    }
+
+    const Tmx::ObjectGroup *Map::GetObjectGroup(int index) const
+    {
+        return &object_groups.at(index);
+    }
+
+    int Map::GetNumObjectGroups() const
+    {
+        return object_groups.size();
+    }
+
+    const std::vector<Tmx::ObjectGroup> &Map::GetObjectGroups() const
+    {
+        return object_groups;
+    }
+
+    const Tmx::ImageLayer *Map::GetImageLayer(int index) const
+    {
+        return &image_layers.at(index);
+    }
+
+    int Map::GetNumImageLayers() const
+    {
+        return image_layers.size();
+    }
+
+    const Tmx::GroupLayer *Map::GetGroupLayer(int index) const
+    {
+        return &group_layers.at(index);
+    }
+
+    int Map::GetNumGroupLayers() const
+    {
+        return group_layers.size();
     }
 
     int Map::FindTilesetIndex(int gid) const
@@ -195,7 +198,7 @@ namespace Tmx
         for (int i = tilesets.size() - 1; i > -1; --i)
         {
             // If the gid beyond the tileset gid return its index.
-            if (gid >= tilesets[i]->GetFirstGid())
+            if (gid >= tilesets[i].GetFirstGid())
             {
                 return i;
             }
@@ -209,176 +212,82 @@ namespace Tmx
         for (int i = tilesets.size() - 1; i > -1; --i)
         {
             // If the gid beyond the tileset gid return it.
-            if (gid >= tilesets[i]->GetFirstGid())
+            if (gid >= tilesets[i].GetFirstGid())
             {
-                return tilesets[i];
+                return &tilesets[i];
             }
         }
 
-        return NULL;
+        return nullptr;
     }
 
-    void Map::Parse(tinyxml2::XMLNode *mapNode)
+    const Tmx::Tileset *Map::GetTileset(int index) const
     {
-        tinyxml2::XMLElement* mapElem = mapNode->ToElement();
+        return &tilesets.at(index);
+    }
 
-        // Read the map attributes.
-        version = mapElem->IntAttribute("version");
-        width = mapElem->IntAttribute("width");
-        height = mapElem->IntAttribute("height");
-        tile_width = mapElem->IntAttribute("tilewidth");
-        tile_height = mapElem->IntAttribute("tileheight");
-        next_object_id = mapElem->IntAttribute("nextobjectid");
+    int Map::GetNumTilesets() const
+    {
+        return tilesets.size();
+    }
 
-        if (mapElem->Attribute("backgroundcolor"))
-        {
-            background_color = Tmx::Color(mapElem->Attribute("backgroundcolor"));
-        }
+    Map::Map(std::string errorText)
+        : has_error{ true }
+        , error_code{ TMX_PARSING_ERROR }
+        , error_text{ std::move(errorText) }
+    {
+    }
 
-        // Read the orientation
-        std::string orientationStr = mapElem->Attribute("orientation");
+    Map::Map(const tinyxml2::XMLElement *data, std::string filePath)
+        : file_path{ std::move(filePath) }
+        , background_color{ Util::ParseOrDefault(data, "backgroundcolor",
+            [](const auto s) { return Tmx::Color{ s }; }, {}) }
+        , version{ data->DoubleAttribute("version") }
+        , orientation{ ParseOrientation(data) }
+        , render_order{ ParseRenderOrder(data) }
+        , stagger_axis{ ParseStaggerAxis(data) }
+        , stagger_index{ ParseStaggerIndex(data) }
+        , width{ data->IntAttribute("width") }
+        , height{ data->IntAttribute("height") }
+        , tile_width{ data->IntAttribute("tilewidth") }
+        , tile_height{ data->IntAttribute("tileheight") }
+        , next_object_id{ data->IntAttribute("nextobjectid") }
+        , hexside_length{ data->IntAttribute("hexsidelength") }
+        , parallaxOriginX{ data->DoubleAttribute("parallaxoriginx") }
+        , parallaxOriginY{ data->DoubleAttribute("parallaxoriginy") }
+        , infinite{ static_cast<bool>(data->IntAttribute("infinite")) }
+        , properties{ data->FirstChildElement("properties") }
+    {
+        const auto parseCollection =
+            [&data](const char *name, auto *collection, auto &&parameter) {
+                const auto count = Util::CountChildren(data, name);
+                if (!count)
+                {
+                    return;
+                }
 
-        if (!orientationStr.compare("orthogonal"))
-        {
-            orientation = TMX_MO_ORTHOGONAL;
-        }
-        else if (!orientationStr.compare("isometric"))
-        {
-            orientation = TMX_MO_ISOMETRIC;
-        }
-        else if (!orientationStr.compare("staggered"))
-        {
-            orientation = TMX_MO_STAGGERED;
-        }
-        else if (!orientationStr.compare("hexagonal"))
-        {
-            orientation = TMX_MO_HEXAGONAL;
-        }
+                collection->reserve(count);
+                Util::IterateChildren(data, name, [&parameter, &collection](const auto e) {
+                    collection->emplace_back(parameter, e);
+                });
+                assert(collection->size() == count);
+            };
 
-        // Read the render order
-        if (mapElem->Attribute("renderorder"))
-        {
-            std::string renderorderStr = mapElem->Attribute("renderorder");
-            if (!renderorderStr.compare("right-down"))
-            {
-                render_order = TMX_RIGHT_DOWN;
+        parseCollection("tileset", &tilesets, file_path);
+        parseCollection("layer", &tile_layers, this);
+        parseCollection("imagelayer", &image_layers, this);
+        parseCollection("objectgroup", &object_groups, this);
+        parseCollection("group", &group_layers, this);
+
+        const auto addLayers = [this](auto &collection) {
+            for (auto &v : collection) {
+                layers.push_back(&v);
             }
-            else if (!renderorderStr.compare("right-up"))
-            {
-                render_order = TMX_RIGHT_UP;
-            }
-            else if (!renderorderStr.compare("left-down"))
-            {
-                render_order = TMX_LEFT_DOWN;
-            }
-            else if (!renderorderStr.compare("left-down"))
-            {
-                render_order = TMX_LEFT_UP;
-            }
-        }
+        };
 
-        // Read the stagger axis
-        if (mapElem->Attribute("staggeraxis"))
-        {
-            std::string staggerAxisStr = mapElem->Attribute("staggeraxis");
-            if (!staggerAxisStr.compare("x"))
-            {
-                stagger_axis = TMX_SA_X;
-            }
-            else if (!staggerAxisStr.compare("y"))
-            {
-                stagger_axis = TMX_SA_Y;
-            }
-        }
-
-        // Read the stagger index
-        if (mapElem->Attribute("staggerindex"))
-        {
-            std::string staggerIndexStr = mapElem->Attribute("staggerindex");
-            if (!staggerIndexStr.compare("even"))
-            {
-                stagger_index = TMX_SI_EVEN;
-            }
-            else if (!staggerIndexStr.compare("odd"))
-            {
-                stagger_index = TMX_SI_ODD;
-            }
-        }
-
-        // read the hexside length
-        if (mapElem->IntAttribute("hexsidelength"))
-        {
-            hexside_length = mapElem->IntAttribute("hexsidelength");
-        }
-
-        // read all other attributes
-        const tinyxml2::XMLNode *node = mapElem->FirstChild();
-        while( node )
-        {
-            // Read the map properties.
-            if( strcmp( node->Value(), "properties" ) == 0 )
-            {
-                properties.Parse(node);
-            }
-
-            // Iterate through all of the tileset elements.
-            if( strcmp( node->Value(), "tileset" ) == 0 )
-            {
-                // Allocate a new tileset and parse it.
-                Tileset *tileset = new Tileset();
-                tileset->Parse(node->ToElement(), file_path);
-
-                // Add the tileset to the list.
-                tilesets.push_back(tileset);
-            }
-
-            // Iterate through all of the "layer" (tile layer) elements.
-            if( strcmp( node->Value(), "layer" ) == 0 )
-            {
-                // Allocate a new tile layer and parse it.
-                TileLayer *tileLayer = new TileLayer(this);
-                tileLayer->Parse(node);
-
-                // Add the tile layer to the lists.
-                tile_layers.push_back(tileLayer);
-                layers.push_back(tileLayer);
-            }
-
-            // Iterate through all of the "imagelayer" (image layer) elements.
-            if( strcmp( node->Value(), "imagelayer" ) == 0 )
-            {
-                // Allocate a new image layer and parse it.
-                ImageLayer *imageLayer = new ImageLayer(this);
-                imageLayer->Parse(node);
-
-                // Add the image layer to the lists.
-                image_layers.push_back(imageLayer);
-                layers.push_back(imageLayer);
-            }
-
-            // Iterate through all of the "objectgroup" (object layer) elements.
-            if( strcmp( node->Value(), "objectgroup" ) == 0 )
-            {
-                // Allocate a new object group and parse it.
-                ObjectGroup *objectGroup = new ObjectGroup(this);
-                objectGroup->Parse(node);
-
-                // Add the object group to the lists.
-                object_groups.push_back(objectGroup);
-                layers.push_back(objectGroup);
-            }
-
-            if( strcmp( node->Value(), "group") == 0 )
-            {
-                GroupLayer *groupLayer = new GroupLayer(this);
-                groupLayer->Parse(node);
-
-                // Add the group layer to the lists.
-                group_layers.push_back(groupLayer);
-                layers.push_back(groupLayer);
-            }
-
-            node = node->NextSibling();
-        }
+        addLayers(tile_layers);
+        addLayers(image_layers);
+        addLayers(object_groups);
+        addLayers(group_layers);
     }
 }

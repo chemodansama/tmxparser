@@ -41,11 +41,7 @@ namespace Tmx
     class TileOffset
     {
     public:
-        TileOffset();
-        ~TileOffset();
-
-        /// Parses a tileoffset element.
-        void Parse(const tinyxml2::XMLNode *tileOffsetNode);
+        TileOffset(const tinyxml2::XMLElement *data);
 
         /// Get the value of the x attribute of the tile offset. Horizontal offset in pixels.
         int GetX() const { return x; }

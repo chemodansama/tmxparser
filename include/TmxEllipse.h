@@ -33,7 +33,7 @@
 
 namespace tinyxml2
 {
-    class XMLNode;
+    class XMLElement;
 }
 
 namespace Tmx
@@ -45,7 +45,7 @@ namespace Tmx
     {
     public:
         /// Construct an ellipse at the given top left position with the given size.
-        Ellipse( int x, int y, int width, int height );
+        Ellipse(const tinyxml2::XMLElement *data, int x, int y, int width, int height );
 
         /// Get the center of the object, in pixels.
         int GetCenterX() const { return x; }
@@ -58,8 +58,6 @@ namespace Tmx
         
         /// Get the RadiusY of the object, in pixels.
         int GetRadiusY() const { return radiusY; }
-
-        void Parse(const tinyxml2::XMLNode *textNode) {}
 
     private:
         int x;

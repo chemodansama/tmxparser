@@ -54,25 +54,12 @@ namespace Tmx
     {
     public:
         /// Construct a new Layer used by a map's objectgroup
-        Layer(Tmx::Map *_map, const std::string _name, const int _x, const int _y,
-            const int _width, const int _height, const float _opacity, const bool _visible,
-            const LayerType _layerType);
+        Layer(Tmx::Map *_map, int _x, int _y,
+            int _width, int _height, LayerType _layerType, const tinyxml2::XMLElement *data);
 
         /// Construct a new layer used by a tile's objectgroup
-        Layer(const Tmx::Tile *_tile, const std::string _name, const int _x, const int _y,
-            const int _width, const int _height, const float _opacity, const bool _visible,
-            const LayerType _layerType);
-
-        Layer(const Layer &source) = delete;
-        Layer &operator=(const Layer &source) = delete;
-
-        Layer(Layer &&source) = default;
-        Layer &operator=(Layer &&source) = default;
-
-        virtual ~Layer() = default;
-
-        /// Parse a layer element.
-        virtual void Parse(const tinyxml2::XMLNode *layerNode);
+        Layer(const Tmx::Tile *_tile, int _x, int _y,
+            int _width, int _height, LayerType _layerType, const tinyxml2::XMLElement *data);
 
         /// Get the pointer to the parent map.
         const Tmx::Map *mapGetMap() const { return map; }
@@ -80,10 +67,12 @@ namespace Tmx
         /// Get the name of the layer.
         const std::string &GetName() const { return name; }
 
-        /// Get the value of the x attribute of the layer. Means different things for different layer types.
+        /// Get the value of the x attribute of the layer.
+        /// Means different things for different layer types.
         int GetX() const { return x; }
 
-        /// Get the value of the y attribute of the layer. Means different things for different layer types.
+        /// Get the value of the y attribute of the layer.
+        /// Means different things for different layer types.
         int GetY() const { return y; }
 
         /// Get the width of the layer, in tiles. Only used in tile layers.
@@ -120,6 +109,9 @@ namespace Tmx
         float GetParallaxY() const { return parallaxY; }
 
     protected:
+        Layer(Tmx::Map *_map, const Tmx::Tile *_tile, int _x, int _y,
+            int _width, int _height, LayerType _layerType, const tinyxml2::XMLElement *data);
+
         /// @cond INTERNAL
         Tmx::Map *map;
         const Tmx::Tile *tile;
@@ -135,8 +127,8 @@ namespace Tmx
         int zOrder;
         int parseOrder;
 
-        float parallaxX{ 1.0f };
-        float parallaxY{ 1.0f };
+        float parallaxX;
+        float parallaxY;
 
         Tmx::LayerType layerType;
 

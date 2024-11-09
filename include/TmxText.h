@@ -62,7 +62,7 @@ namespace Tmx
     {
     public:
         /// Construct text with the given options.
-        Text();
+        Text(const tinyxml2::XMLElement *data);
 
         std::string GetContents() const noexcept { return contents; }
         std::string GetFontFamily() const noexcept { return font_family; }
@@ -77,9 +77,6 @@ namespace Tmx
         HorizontalAlignment GetHorizontalAlignment() const noexcept { return horizontal_alignment; }
         VerticalAlignment GetVerticalAlignment() const noexcept { return vertical_alignment; }
 
-        /// Parse the text node.
-        void Parse(const tinyxml2::XMLNode *textNode);
-
     private:
         std::string contents;
         std::string font_family;
@@ -93,6 +90,5 @@ namespace Tmx
         bool kerning;
         HorizontalAlignment horizontal_alignment;
         VerticalAlignment vertical_alignment;
-
     };
 }

@@ -29,39 +29,38 @@
 
 int main(int argc, char * argv[])
 {
-    Tmx::Map *map = new Tmx::Map();
     std::string fileName = (argc > 1) ? argv[1] : "./example/example.tmx";
-    map->ParseFile(fileName);
+    auto map = Tmx::Map::ParseFile(fileName);
 
-    if (map->HasError())
+    if (map.HasError())
     {
-        printf("error code: %d\n", map->GetErrorCode());
-        printf("error text: %s\n", map->GetErrorText().c_str());
+        printf("error code: %d\n", map.GetErrorCode());
+        printf("error text: %s\n", map.GetErrorText().c_str());
 
-        return map->GetErrorCode();
+        return map.GetErrorCode();
     }
 
     printf("====================================\n");
     printf("Map\n");
     printf("====================================\n");
 
-    printf("Version: %1.1f\n", map->GetVersion());
-    printf("Orientation: %d\n", map->GetOrientation());
-    if (!map->GetBackgroundColor().IsTransparent())
+    printf("Version: %1.1f\n", map.GetVersion());
+    printf("Orientation: %d\n", map.GetOrientation());
+    if (!map.GetBackgroundColor().IsTransparent())
         printf("Background Color (hex): %s\n",
-               map->GetBackgroundColor().ToString().c_str());
-    printf("Render Order: %d\n", map->GetRenderOrder());
-    if (map->GetStaggerAxis())
-        printf("Stagger Axis: %d\n", map->GetStaggerAxis());
-    if (map->GetStaggerIndex())
-        printf("Stagger Index: %d\n", map->GetStaggerIndex());
-    printf("Width: %d\n", map->GetWidth());
-    printf("Height: %d\n", map->GetHeight());
-    printf("Tile Width: %d\n", map->GetTileWidth());
-    printf("Tile Height: %d\n", map->GetTileHeight());
+               map.GetBackgroundColor().ToString().c_str());
+    printf("Render Order: %d\n", map.GetRenderOrder());
+    if (map.GetStaggerAxis())
+        printf("Stagger Axis: %d\n", map.GetStaggerAxis());
+    if (map.GetStaggerIndex())
+        printf("Stagger Index: %d\n", map.GetStaggerIndex());
+    printf("Width: %d\n", map.GetWidth());
+    printf("Height: %d\n", map.GetHeight());
+    printf("Tile Width: %d\n", map.GetTileWidth());
+    printf("Tile Height: %d\n", map.GetTileHeight());
 
     // Iterate through map properties and print the type, name and value of each property.
-    const std::unordered_map<std::string, Tmx::Property> &mapProperties = map->GetProperties().GetPropertyMap();
+    const std::unordered_map<std::string, Tmx::Property> &mapProperties = map.GetProperties().GetPropertyMap();
     for (auto &pair : mapProperties)
     {
         const Tmx::Property &property = pair.second;
@@ -101,23 +100,23 @@ int main(int argc, char * argv[])
     }
 
     // Make sure property parsing works correctly across the library.
-    assert(mapProperties.at("StringProperty").GetValue() == map->GetProperties().GetStringProperty("StringProperty"));
-    assert(mapProperties.at("IntProperty").GetIntValue() == map->GetProperties().GetIntProperty("IntProperty"));
-    assert(mapProperties.at("NegativeIntProperty").GetIntValue() == map->GetProperties().GetIntProperty("NegativeIntProperty"));
-    assert(mapProperties.at("FloatProperty").GetFloatValue() == map->GetProperties().GetFloatProperty("FloatProperty"));
-    assert(mapProperties.at("NegativeFloatProperty").GetFloatValue() == map->GetProperties().GetFloatProperty("NegativeFloatProperty"));
-    assert(mapProperties.at("BigInteger").GetIntValue() == map->GetProperties().GetIntProperty("BigInteger"));
-    assert(mapProperties.at("FalseProperty").GetBoolValue() == map->GetProperties().GetBoolProperty("FalseProperty"));
-    assert(mapProperties.at("TrueProperty").GetBoolValue() == map->GetProperties().GetBoolProperty("TrueProperty"));
-    assert(mapProperties.at("YellowProperty").GetColorValue() == map->GetProperties().GetColorProperty("YellowProperty"));
-    assert(mapProperties.at("FileProperty").GetBoolValue() == map->GetProperties().GetBoolProperty("FileProperty"));
+    assert(mapProperties.at("StringProperty").GetValue() == map.GetProperties().GetStringProperty("StringProperty"));
+    assert(mapProperties.at("IntProperty").GetIntValue() == map.GetProperties().GetIntProperty("IntProperty"));
+    assert(mapProperties.at("NegativeIntProperty").GetIntValue() == map.GetProperties().GetIntProperty("NegativeIntProperty"));
+    assert(mapProperties.at("FloatProperty").GetFloatValue() == map.GetProperties().GetFloatProperty("FloatProperty"));
+    assert(mapProperties.at("NegativeFloatProperty").GetFloatValue() == map.GetProperties().GetFloatProperty("NegativeFloatProperty"));
+    assert(mapProperties.at("BigInteger").GetIntValue() == map.GetProperties().GetIntProperty("BigInteger"));
+    assert(mapProperties.at("FalseProperty").GetBoolValue() == map.GetProperties().GetBoolProperty("FalseProperty"));
+    assert(mapProperties.at("TrueProperty").GetBoolValue() == map.GetProperties().GetBoolProperty("TrueProperty"));
+    assert(mapProperties.at("YellowProperty").GetColorValue() == map.GetProperties().GetColorProperty("YellowProperty"));
+    assert(mapProperties.at("FileProperty").GetBoolValue() == map.GetProperties().GetBoolProperty("FileProperty"));
 
     // Make sure color can be converted from and to string
-    assert(map->GetProperties().GetColorProperty("YellowProperty").ToString() == map->GetProperties().GetStringProperty("YellowProperty"));
+    assert(map.GetProperties().GetColorProperty("YellowProperty").ToString() == map.GetProperties().GetStringProperty("YellowProperty"));
     assert(Tmx::Color("#ffffff") == Tmx::Color("#ffffffff"));
 
     // Iterate through the tilesets.
-    for (int i = 0; i < map->GetNumTilesets(); ++i)
+    for (int i = 0; i < map.GetNumTilesets(); ++i)
     {
         printf("                                    \n");
         printf("====================================\n");
@@ -125,7 +124,7 @@ int main(int argc, char * argv[])
         printf("====================================\n");
 
         // Get a tileset.
-        const Tmx::Tileset *tileset = map->GetTileset(i);
+        const Tmx::Tileset *tileset = map.GetTileset(i);
 
         // Print tileset information.
         printf("Name: %s\n", tileset->GetName().c_str());
@@ -142,16 +141,7 @@ int main(int argc, char * argv[])
         if (tileset->GetTiles().size() > 0)
         {
             // Get a tile from the tileset.
-            const Tmx::Tile *tile = *(tileset->GetTiles().begin());
-
-            // Print the properties of a tile.
-            std::map<std::string, std::string> list =
-                    tile->GetProperties().GetList();
-            std::map<std::string, std::string>::iterator iter;
-            for (iter = list.begin(); iter != list.end(); ++iter)
-            {
-                printf("%s = %s\n", iter->first.c_str(), iter->second.c_str());
-            }
+            const Tmx::Tile *tile = &tileset->GetTiles().front();
 
             if (tile->IsAnimated())
             {
@@ -183,7 +173,7 @@ int main(int argc, char * argv[])
                 for (int j = 0; j < tile->GetNumObjects(); ++j)
                 {
                     // Get an object.
-                    const Tmx::Object *object = tile->GetObject(j);
+                    const Tmx::Object *object = &tile->GetObject(j);
 
                     // Print information about the object.
                     printf("Object Name: %s\n", object->GetName().c_str());
@@ -222,15 +212,15 @@ int main(int argc, char * argv[])
     }
 
     // Iterate through the tile layers.
-    for (int i = 0; i < map->GetNumTileLayers(); ++i)
+    for (int i = 0; i < map.GetNumTileLayers(); ++i)
     {
         printf("                                    \n");
         printf("====================================\n");
-        printf("Layer : %02d/%s \n", i, map->GetTileLayer(i)->GetName().c_str());
+        printf("Layer : %02d/%s \n", i, map.GetTileLayer(i)->GetName().c_str());
         printf("====================================\n");
 
         // Get a layer.
-        const Tmx::TileLayer *tileLayer = map->GetTileLayer(i);
+        const Tmx::TileLayer *tileLayer = map.GetTileLayer(i);
 
         for (int y = 0; y < tileLayer->GetHeight(); ++y)
         {
@@ -246,7 +236,7 @@ int main(int argc, char * argv[])
                     printf("%03d(%03d)", tileLayer->GetTileId(x, y), tileLayer->GetTileGid(x, y));
 
                     // Find a tileset for that id.
-                    //const Tmx::Tileset *tileset = map->FindTileset(layer->GetTileId(x, y));
+                    //const Tmx::Tileset *tileset = map.FindTileset(layer->GetTileId(x, y));
                     if (tileLayer->IsTileFlippedHorizontally(x, y))
                     {
                         printf("h");
@@ -281,7 +271,7 @@ int main(int argc, char * argv[])
     printf("\n\n");
 
     // Iterate through all of the object groups.
-    for (int i = 0; i < map->GetNumObjectGroups(); ++i)
+    for (int i = 0; i < map.GetNumObjectGroups(); ++i)
     {
         printf("                                    \n");
         printf("====================================\n");
@@ -289,13 +279,13 @@ int main(int argc, char * argv[])
         printf("====================================\n");
 
         // Get an object group.
-        const Tmx::ObjectGroup *objectGroup = map->GetObjectGroup(i);
+        const Tmx::ObjectGroup *objectGroup = map.GetObjectGroup(i);
 
         // Iterate through all objects in the object group.
         for (int j = 0; j < objectGroup->GetNumObjects(); ++j)
         {
             // Get an object.
-            const Tmx::Object *object = objectGroup->GetObject(j);
+            const Tmx::Object *object = &objectGroup->GetObject(j);
 
             // Print information about the object.
             printf("Object Name: %s\n", object->GetName().c_str());
@@ -347,20 +337,20 @@ int main(int argc, char * argv[])
                 printf("Kerning: %d\n", text->UseKerning());
                 printf("Horizontal ALignment: %d\n", text->GetHorizontalAlignment());
                 printf("Vertical Alignment: %d\n", text->GetVerticalAlignment());
-                printf("Color: %d, %d, %d, %d", text->GetColor()->GetRed(), text->GetColor()->GetGreen(),
-                                                text->GetColor()->GetBlue(), text->GetColor()->GetAlpha());
+                printf("Color: %d, %d, %d, %d", text->GetColor().GetRed(), text->GetColor().GetGreen(),
+                                                text->GetColor().GetBlue(), text->GetColor().GetAlpha());
             }
         }
     }
 
     // Iterate through all of the group layers.
-    for(int i = 0; i < map->GetNumGroupLayers(); ++i) {
+    for(int i = 0; i < map.GetNumGroupLayers(); ++i) {
         printf("                                    \n");
         printf("====================================\n");
-        printf("Group Layer : %02d/%s \n", i, map->GetGroupLayer(i)->GetName().c_str());
+        printf("Group Layer : %02d/%s \n", i, map.GetGroupLayer(i)->GetName().c_str());
         printf("====================================\n");
         // Get a group layer.
-        const Tmx::GroupLayer *groupLayer = map->GetGroupLayer(i);
+        const Tmx::GroupLayer *groupLayer = map.GetGroupLayer(i);
 
         printf("Offset X: %d", groupLayer->GetOffsetX());
         printf("Offset Y: %d", groupLayer->GetOffsetY());
@@ -379,8 +369,6 @@ int main(int argc, char * argv[])
           }
         }
     }
-
-    delete map;
 
     return 0;
 }

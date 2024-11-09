@@ -28,76 +28,44 @@
 
 #include "TmxObjectGroup.h"
 
-namespace Tmx 
+namespace Tmx
 {
-    ObjectGroup::ObjectGroup(Tmx::Map *_map)
-        : Layer{ _map, std::string(), 0, 0, 0, 0, 1.0f, true, TMX_LAYERTYPE_OBJECTGROUP }
+    namespace
     {
-    }
-
-    ObjectGroup::ObjectGroup(const Tmx::Tile *_tile)
-        : Layer{ _tile, std::string(), 0, 0, 0, 0, 1.0f, true, TMX_LAYERTYPE_OBJECTGROUP }
-    {
-    }
-
-    ObjectGroup::ObjectGroup(ObjectGroup &&source) noexcept
-        : Layer{ std::move(source) }
-        , color{ source.color }
-        , objects{ std::move(source.objects) }
-    {
-    }
-
-    ObjectGroup &ObjectGroup::operator=(ObjectGroup &&source) noexcept
-    {
-        Layer::operator=(std::move(source));
-
-        color = std::move(source.color);
-        objects = std::move(source.objects);
-
-        return *this;
-    }
-
-    ObjectGroup::~ObjectGroup() 
-    {
-        for (const auto o : objects)
+        auto ParseColor(const tinyxml2::XMLElement *data)
         {
-            delete o;
+            const auto colorAttribute = data->Attribute("color");
+            return colorAttribute ? Tmx::Color(colorAttribute) : Tmx::Color{};
+        }
+
+        auto ParseObjects(const tinyxml2::XMLElement *data, Tmx::Map *map)
+        {
+            std::vector<Tmx::Object> objects;
+
+            constexpr auto const object = "object";
+
+            // Iterate through all of the object elements.
+            for (auto o = data->FirstChildElement(object); o; o = o->NextSiblingElement(object))
+            {
+                // Add the object to the list.
+                objects.emplace_back(o, map);
+            }
+
+            return objects;
         }
     }
 
-    void ObjectGroup::Parse(const tinyxml2::XMLNode *objectGroupNode) 
+    ObjectGroup::ObjectGroup(Tmx::Map *_map, const tinyxml2::XMLElement *data)
+        : Layer{ _map, 0, 0, 0, 0, TMX_LAYERTYPE_OBJECTGROUP, data }
+        , color{ ParseColor(data) }
+        , objects{ ParseObjects(data, map) }
     {
-        Layer::Parse(objectGroupNode);
-
-        const tinyxml2::XMLElement *objectGroupElem = objectGroupNode->ToElement();
-        if (const auto colorAttribute = objectGroupElem->Attribute("color"))
-        {
-            color = Tmx::Color(colorAttribute);
-        }
-
-        objectGroupElem->QueryFloatAttribute("opacity", &opacity);
-        objectGroupElem->QueryBoolAttribute("visible", &visible);
-
-        // Read the properties.
-        if (const auto propertiesNode = objectGroupNode->FirstChildElement("properties"))
-        {
-            properties.Parse(propertiesNode);
-        }
-
-        // Iterate through all of the object elements.
-        const tinyxml2::XMLNode *objectNode = objectGroupNode->FirstChildElement("object");
-        while (objectNode) 
-        {
-            // Allocate a new object and parse it.
-            Object *object = new Object();
-            object->Parse(objectNode, map);
-            
-            // Add the object to the list.
-            objects.push_back(object);
-
-            //objectNode = objectGroupNode->IterateChildren("object", objectNode); -- FIXME MAYBE
-            objectNode = objectNode->NextSiblingElement("object");
-        }
     }
 
+    ObjectGroup::ObjectGroup(const Tmx::Tile *_tile, const tinyxml2::XMLElement *data)
+        : Layer{ _tile, 0, 0, 0, 0, TMX_LAYERTYPE_OBJECTGROUP, data }
+        , color{ ParseColor(data) }
+        , objects{ ParseObjects(data, map) }
+    {
+    }
 }

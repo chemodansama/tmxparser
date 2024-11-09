@@ -28,30 +28,32 @@
 
 #include "TmxPolygon.h"
 
-#include <cstdlib> 
+#include "TmxUtil.h"
 
 namespace Tmx 
 {
-    Polygon::Polygon()
-        : points()
+    namespace
+    {
+        std::string_view GetPointsAttribute(const tinyxml2::XMLElement *data)
+        {
+            if (const auto v = data ? data->Attribute("points") : nullptr)
+            {
+                return v;
+            }
+
+            return {};
+        }
+    }
+
+    Polygon::Polygon(const tinyxml2::XMLElement *data)
+        : Polygon{ GetPointsAttribute(data) }
     {
     }
 
-    void Polygon::Parse(const tinyxml2::XMLNode *polygonNode)
+    Polygon::Polygon(std::string_view data)
     {
-        char *pointsLine = strdup(polygonNode->ToElement()->Attribute("points"));
-        
-        char *token = strtok(pointsLine, " ");
-        while (token)
-        {
-            Point point;
-            sscanf(token, "%f,%f", &point.x, &point.y);
-
-            points.push_back(point);
-
-            token = strtok(0, " ");
-        }
-
-        free(pointsLine);
+        Util::Iterate(data, ' ', [this](auto first, auto last) {
+            points.push_back(ParsePoint(std::string_view{ first, last }));
+        });
     }
 }

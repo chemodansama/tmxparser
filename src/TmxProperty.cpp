@@ -32,10 +32,9 @@ namespace Tmx
 {
     namespace
     {
-        PropertyType ParsePropertyType(const tinyxml2::XMLElement *property)
+        PropertyType ParsePropertyType(const tinyxml2::XMLElement *data)
         {
-            const auto typeAttribute = property->FindAttribute("type");
-
+            const auto typeAttribute = data->FindAttribute("type");
             if (!typeAttribute)
             {
                 return TMX_PROPERTY_STRING;
@@ -53,26 +52,86 @@ namespace Tmx
                 strcmp(typeAsCString, "float") == 0  ? TMX_PROPERTY_FLOAT :
                 strcmp(typeAsCString, "int") == 0    ? TMX_PROPERTY_INT :
                 strcmp(typeAsCString, "color") == 0  ? TMX_PROPERTY_COLOR :
-                strcmp(typeAsCString, "file") == 0   ? TMX_PROPERTY_FILE
+                strcmp(typeAsCString, "file") == 0   ? TMX_PROPERTY_FILE :
+                strcmp(typeAsCString, "object") == 0 ? TMX_PROPERTY_OBJECT :
+                strcmp(typeAsCString, "class") == 0  ? TMX_PROPERTY_CLASS
                                                      : TMX_PROPERTY_STRING;
         }
 
-        std::string ParsePropertyValue(const tinyxml2::XMLElement *property)
+        std::string ParsePropertyValue(const tinyxml2::XMLElement *data)
         {
-            if (const char *valueAsCString = property->Attribute("value"))
+            if (const char *valueAsCString = data->Attribute("value"))
             {
                 return valueAsCString;
             }
 
             // The value of properties that contain newlines is stored in the element text.
-            const auto text = property->GetText();
+            const auto text = data->GetText();
             return text ? text : std::string();
         }
     }
 
-    Property::Property(const tinyxml2::XMLElement *propertyElem)
-        : type{ ParsePropertyType(propertyElem) }
-        , value{ ParsePropertyValue(propertyElem) }
+    Property::Property(const tinyxml2::XMLElement *data)
+        : type{ ParsePropertyType(data) }
     {
+        const auto valueString = ParsePropertyValue(data);
+        isEmpty = valueString.empty();
+
+        switch (type)
+        {
+            case TMX_PROPERTY_STRING:
+            {
+                value = std::move(valueString);
+                break;
+            }
+
+            case TMX_PROPERTY_BOOL:
+            {
+                value = valueString.compare("true") == 0;
+                break;
+            }
+
+            case TMX_PROPERTY_INT:
+            {
+                value = std::stoi(valueString);
+                break;
+            }
+
+            case TMX_PROPERTY_FLOAT:
+            {
+                value = std::stof(valueString);
+                break;
+            }
+
+            case TMX_PROPERTY_COLOR:
+            {
+                value = Tmx::Color(valueString);
+                break;
+            }
+
+            case TMX_PROPERTY_FILE:
+            {
+                value = std::move(valueString);
+                break;
+            }
+
+            case TMX_PROPERTY_OBJECT:
+            {
+                value = std::stoi(valueString);
+                break;
+            }
+
+            case TMX_PROPERTY_CLASS:
+            {
+                //TODO: implement
+                break;
+            }
+
+            default:
+            {
+                value = std::move(valueString);
+                break;
+            }
+        }
     }
 }

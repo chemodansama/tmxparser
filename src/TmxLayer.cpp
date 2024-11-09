@@ -24,9 +24,7 @@
 
 #include "TmxLayer.h"
 
-#include <algorithm>
 #include <cstdlib>
-#include <cstdio>
 
 #ifdef USE_MINIZ
 #define MINIZ_HEADER_FILE_ONLY
@@ -47,57 +45,64 @@ namespace
     /// @endcond
 }
 
-namespace Tmx 
+namespace Tmx
 {
-    Layer::Layer(Tmx::Map *_map, const std::string _name, const int _x, const int _y, const int _width, const int _height, const float _opacity, const bool _visible, const LayerType _layerType)
-        : map(_map)
-        , tile(NULL)
-        , name(_name)
-        , x(_x)
-        , y(_y)
-        , width(_width)
-        , height(_height)
-        , opacity(_opacity)
-        , visible(_visible)
-        , zOrder(nextParseOrder)
-        , parseOrder(nextParseOrder)
-        , layerType(_layerType)
-        , properties()
+    namespace
     {
-        ++nextParseOrder;
-    }
+        auto ParseName(const tinyxml2::XMLElement * const data)
+        {
+            const auto nameAttribute = data->Attribute("name");
+            return nameAttribute ? std::string{ nameAttribute } : std::string{};
+        }
 
-    Layer::Layer(const Tmx::Tile *_tile, const std::string _name, const int _x, const int _y, const int _width, const int _height, const float _opacity, const bool _visible, const LayerType _layerType) 
-        : map(NULL)
-        , tile(_tile)
-        , name(_name)
-        , x(_x)
-        , y(_y)
-        , width(_width)
-        , height(_height)
-        , opacity(_opacity)
-        , visible(_visible)
-        , zOrder(nextParseOrder)
-        , parseOrder(nextParseOrder)
-        , layerType(_layerType)
-        , properties()
-    {
-        ++nextParseOrder;
-    }
-
-    void Layer::Parse(const tinyxml2::XMLNode *layerNode)
-    {
-        const tinyxml2::XMLElement *layerElement = layerNode->ToElement();
-
-        const auto nameAttribute = layerElement->Attribute("name");
-        name = nameAttribute ? std::string{ nameAttribute } : std::string{};
-
-        const auto floatAttribute = [layerElement](const char *name, auto defaultValue) {
-            const auto a = layerElement->Attribute(name);
-            return a ? std::atof(a) : defaultValue;
+        auto GetFloatAttribute(const tinyxml2::XMLElement * const data,
+            const char * const name, const float defaultValue)
+        {
+            const auto a = data->Attribute(name);
+            return a ? std::strtof(a, nullptr) : defaultValue;
         };
 
-        parallaxX = floatAttribute("parallaxx", parallaxX);
-        parallaxY = floatAttribute("parallaxy", parallaxY);
+        auto GetBoolAttribute(const tinyxml2::XMLElement * const data,
+            const char * const name, const bool defaultValue)
+        {
+            bool result{ defaultValue };
+            data->QueryBoolAttribute("visible", &result);
+            return result;
+        }
+    }
+
+    Layer::Layer(Tmx::Map *_map, const int _x, const int _y,
+        const int _width, const int _height, const LayerType _layerType,
+        const tinyxml2::XMLElement *data)
+        : Layer{ _map, nullptr, _x, _y, _width, _height, _layerType, data }
+    {
+    }
+
+    Layer::Layer(const Tmx::Tile *_tile, const int _x, const int _y,
+        const int _width, const int _height, const LayerType _layerType,
+        const tinyxml2::XMLElement *data)
+        : Layer{ nullptr, _tile, _x, _y, _width, _height, _layerType, data }
+    {
+    }
+
+    Layer::Layer(Tmx::Map *_map, const Tmx::Tile *_tile, int _x, int _y,
+        int _width, int _height, LayerType _layerType, const tinyxml2::XMLElement *data)
+        : map(_map)
+        , tile(_tile)
+        , name(ParseName(data))
+        , x(_x)
+        , y(_y)
+        , width(_width)
+        , height(_height)
+        , opacity(GetFloatAttribute(data, "opacity", 1.0f))
+        , visible(GetBoolAttribute(data, "visible", true))
+        , zOrder(nextParseOrder)
+        , parseOrder(nextParseOrder)
+        , parallaxX{ GetFloatAttribute(data, "parallaxx", 1.0f) }
+        , parallaxY{ GetFloatAttribute(data, "parallaxy", 1.0f) }
+        , layerType(_layerType)
+        , properties(data->FirstChildElement("properties"))
+    {
+        ++nextParseOrder;
     }
 }

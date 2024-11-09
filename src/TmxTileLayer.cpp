@@ -25,6 +25,7 @@
 #include "TmxTileLayer.h"
 
 #include <algorithm>
+#include <cassert>
 #include <cstdio>
 #include <cstdlib>
 
@@ -42,84 +43,39 @@
 
 namespace Tmx 
 {
-    TileLayer::TileLayer(Map *_map)
-        : Layer(_map, std::string(), 0, 0, _map->GetWidth(), _map->GetHeight(), 1.0f, true, TMX_LAYERTYPE_TILE)
-        , tile_map(NULL)  // Set the map to null to specify that it is not yet allocated.
+    TileLayer::TileLayer(Map *_map, const tinyxml2::XMLElement *data)
+        : Layer{ _map, data->IntAttribute("x"), data->IntAttribute("y"),
+            _map->GetWidth(), _map->GetHeight(), TMX_LAYERTYPE_TILE, data }
         , encoding(TMX_ENCODING_XML)
         , compression(TMX_COMPRESSION_NONE)
+        , offsetX{ data->FloatAttribute("offsetx") }
+        , offsetY{ data->FloatAttribute("offsety") }
     {
-    }
-
-    TileLayer::~TileLayer() 
-    {
-        // If the tile map is allocated, delete it from the memory.
-        if (tile_map)
-        {
-            delete [] tile_map;
-            tile_map = NULL;
-        }
-    }
-
-    void TileLayer::Parse(const tinyxml2::XMLNode *tileLayerNode) 
-    {
-        Layer::Parse(tileLayerNode);
-
-        const tinyxml2::XMLElement *tileLayerElem = tileLayerNode->ToElement();
-    
-        // Read the attributes.
-        tileLayerElem->QueryIntAttribute("x", &x);
-        tileLayerElem->QueryIntAttribute("y", &y);
-
-        tileLayerElem->QueryFloatAttribute("opacity", &opacity);
-        tileLayerElem->QueryBoolAttribute("visible", &visible);
-
-        tileLayerElem->QueryFloatAttribute("offsetx", &offsetX);
-        tileLayerElem->QueryFloatAttribute("offsety", &offsetY);
-
-        // Read the properties.
-        const tinyxml2::XMLNode *propertiesNode = tileLayerNode->FirstChildElement("properties");
-        if (propertiesNode) 
-        {
-            properties.Parse(propertiesNode);
-        }
-
         // Allocate memory for reading the tiles.
-        tile_map = new MapTile[width * height];
+        tile_map.reserve(width * height);
 
-        //const tinyxml2::XMLNode *dataNode = tileLayerNode->FirstChildElement("data");
-        const tinyxml2::XMLElement *dataElem = tileLayerNode->FirstChildElement("data");
-
-        const char *encodingStr = dataElem->Attribute("encoding");
-        const char *compressionStr = dataElem->Attribute("compression");
+        const tinyxml2::XMLElement *dataElem = data->FirstChildElement("data");
 
         // Check for encoding.
-        if (encodingStr) 
+        if (const char *encodingStr = dataElem->Attribute("encoding"))
         {
-            if (!strcmp(encodingStr, "base64")) 
-            {
-                encoding = TMX_ENCODING_BASE64;
-            } 
-            else if (!strcmp(encodingStr, "csv")) 
-            {
-                encoding = TMX_ENCODING_CSV;
-            }
+            encoding =
+                strcmp(encodingStr, "base64") == 0 ? TMX_ENCODING_BASE64 :
+                strcmp(encodingStr, "csv") == 0    ? TMX_ENCODING_CSV
+                                                   : encoding;
         }
 
         // Check for compression.
-        if (compressionStr) 
+        if (const char *compressionStr = dataElem->Attribute("compression"))
         {
-            if (!strcmp(compressionStr, "gzip")) 
-            {
-                compression = TMX_COMPRESSION_GZIP;
-            } 
-            else if (!strcmp(compressionStr, "zlib")) 
-            {
-                compression = TMX_COMPRESSION_ZLIB;
-            }
+            compression =
+                strcmp(compressionStr, "gzip") == 0 ? TMX_COMPRESSION_GZIP :
+                strcmp(compressionStr, "zlib") == 0 ? TMX_COMPRESSION_ZLIB
+                                                    : compression;
         }
         
         // Decode.
-        switch (encoding) 
+        switch (encoding)
         {
         case TMX_ENCODING_XML:
             ParseXML(dataElem);
@@ -135,22 +91,13 @@ namespace Tmx
         }
     }
 
-    void TileLayer::ParseXML(const tinyxml2::XMLNode *dataNode) 
+    void TileLayer::ParseXML(const tinyxml2::XMLNode *data) 
     {
-        const tinyxml2::XMLNode *tileNode = dataNode->FirstChildElement("tile");
-        int tileCount = 0;
-
-        while (tileNode) 
+        for (auto tile = data->FirstChildElement("tile"); tile;
+            tile = tile->NextSiblingElement("tile"))
         {
-            const tinyxml2::XMLElement *tileElem = tileNode->ToElement();
-            
-            unsigned gid = 0;
-
-            // Read the Global-ID of the tile.
-            const char* gidText = tileElem->Attribute("gid");
-
             // Convert to an unsigned.
-            sscanf(gidText, "%u", &gid);
+            const auto gid = std::strtoul(tile->Attribute("gid"), nullptr, 10);
 
             // Find the tileset index.
             const int tilesetIndex = map->FindTilesetIndex(gid);
@@ -158,26 +105,21 @@ namespace Tmx
             {
                 // If valid, set up the map tile with the tileset.
                 const Tmx::Tileset* tileset = map->GetTileset(tilesetIndex);
-                tile_map[tileCount] = MapTile(gid, tileset->GetFirstGid(), tilesetIndex);
+                tile_map.emplace_back(gid, tileset->GetFirstGid(), tilesetIndex);
             }
             else
             {
                 // Otherwise, make it null.
-                tile_map[tileCount] = MapTile(gid, 0, -1);
+                tile_map.emplace_back(gid, 0, -1);
             }
-
-            //tileNode = dataNode->IterateChildren("tile", tileNode); FIXME MAYBE
-            tileNode = tileNode->NextSiblingElement("tile");
-            tileCount++;
         }
     }
 
-    void TileLayer::ParseBase64(const std::string &innerText) 
+    void TileLayer::ParseBase64(std::string innerText) 
     {
-    	std::string testText = innerText;
-    	Util::Trim( testText );
+    	Util::Trim(innerText);
 
-        const std::string &text = Util::DecodeBase64(testText);
+        const std::string &text = Util::DecodeBase64(innerText);
 
         // Temporary array of gids to be converted to map tiles.
         unsigned *out = 0;
@@ -209,10 +151,12 @@ namespace Tmx
             memcpy(out, text.c_str(), text.size());
         }
 
+        assert(out);
+
         // Convert the gids to map tiles.
-        for (int x = 0; x < width; x++)
+        for (int y = 0; y < height; y++)
         {
-            for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
             {
                 unsigned gid = out[y * width + x];
 
@@ -222,12 +166,12 @@ namespace Tmx
                 {
                     // If valid, set up the map tile with the tileset.
                     const Tmx::Tileset* tileset = map->GetTileset(tilesetIndex);
-                    tile_map[y * width + x] = MapTile(gid, tileset->GetFirstGid(), tilesetIndex);
+                    tile_map.emplace_back(gid, tileset->GetFirstGid(), tilesetIndex);
                 }
                 else
                 {
                     // Otherwise, make it null.
-                    tile_map[y * width + x] = MapTile(gid, 0, -1);
+                    tile_map.emplace_back(gid, 0, -1);
                 }
             }
         }
@@ -238,36 +182,24 @@ namespace Tmx
 
     void TileLayer::ParseCSV(const std::string &innerText) 
     {
-        // Duplicate the string for use with C stdio.
-        char *csv = strdup(innerText.c_str());
-        
-        // Iterate through every token of ';' in the CSV string.
-        char *pch = strtok(csv, ",");
-        int tileCount = 0;
-        
-        while (pch) 
-        {
-            unsigned gid;
-            sscanf(pch, "%u", &gid);
+        Util::Iterate(innerText, ',', [this](auto first, auto last) {
+            std::string_view s{ first, last };
+            const auto gid = std::strtoul(s.data(), nullptr, 10);
 
             // Find the tileset index.
             const int tilesetIndex = map->FindTilesetIndex(gid);
             if (tilesetIndex != -1)
             {
                 // If valid, set up the map tile with the tileset.
-                const Tmx::Tileset* tileset = map->GetTileset(tilesetIndex);
-                tile_map[tileCount] = MapTile(gid, tileset->GetFirstGid(), tilesetIndex);
+                const Tmx::Tileset *tileset = map->GetTileset(tilesetIndex);
+                assert(tileset);
+                tile_map.emplace_back(gid, tileset->GetFirstGid(), tilesetIndex);
             }
             else
             {
                 // Otherwise, make it null.
-                tile_map[tileCount] = MapTile(gid, 0, -1);
+                tile_map.emplace_back(gid, 0, -1);
             }
-
-            pch = strtok(NULL, ",");
-            tileCount++;
-        }
-
-        free(csv);
+        });
     }
 }

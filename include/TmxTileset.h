@@ -27,19 +27,20 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
 #include <tinyxml2.h>
 
 #include "TmxPropertySet.h"
+#include "TmxTerrain.h"
+#include "TmxTile.h"
+#include "TmxTileOffset.h"
 
-namespace Tmx 
+namespace Tmx
 {
     class Image;
-    class TileOffset;
-    class Terrain;
-    class Tile;
 
     //-------------------------------------------------------------------------
     /// A class used for storing information about each of the tilesets.
@@ -49,11 +50,7 @@ namespace Tmx
     class Tileset 
     {
     public:
-        Tileset();
-        ~Tileset();
-
-        /// Parse a tileset element.
-        void Parse(const tinyxml2::XMLNode *tilesetNode, const std::string& file_path);
+        Tileset(const std::string &file_path, const tinyxml2::XMLNode *tilesetNode);
 
         /// Returns the global id of the first tile.
         int GetFirstGid() const { return first_gid; }
@@ -82,17 +79,17 @@ namespace Tmx
         int GetColumns() const { return columns;}
 
         /// Get the offset of tileset
-        const Tmx::TileOffset* GetTileOffset() const { return tileOffset; }
+        const Tmx::TileOffset &GetTileOffset() const { return tileOffset; }
 
         /// Returns a variable containing information
         /// about the image of the tileset.
-        const Tmx::Image* GetImage() const { return image; }
+        const Tmx::Image* GetImage() const { return image.get(); }
 
         /// Returns a a single tile of the set.
         const Tmx::Tile *GetTile(int index) const;
 
         /// Returns the whole tile collection.
-        const std::vector< Tmx::Tile *> &GetTiles() const { return tiles; } 
+        const std::vector<Tmx::Tile> &GetTiles() const { return tiles; }
         
         /// Get a set of properties regarding the tile.
         const Tmx::PropertySet &GetProperties() const { return properties; }
@@ -110,11 +107,11 @@ namespace Tmx
         int tile_count;
         int columns;
         
-        Tmx::TileOffset* tileOffset;
-        Tmx::Image* image;
+        Tmx::TileOffset tileOffset;
+        std::unique_ptr<Tmx::Image> image;
 
-        std::vector< Tmx::Terrain* > terrainTypes;
-        std::vector< Tmx::Tile* > tiles;
+        std::vector<Tmx::Terrain> terrainTypes;
+        std::vector<Tmx::Tile> tiles;
         
         Tmx::PropertySet properties;
     };

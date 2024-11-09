@@ -1,6 +1,11 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.14)
 
 project(tmxparser)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
+set(CMAKE_CXX11_EXTENSION_COMPILE_OPTION "-std=c++20")
 
 include(GNUInstallDirs)
 
@@ -61,6 +66,8 @@ target_sources(tmxparser
   PRIVATE include/TmxObject.h
   PRIVATE src/TmxObjectGroup.cpp
   PRIVATE include/TmxObjectGroup.h
+  PRIVATE src/TmxPoint.cpp
+  PRIVATE include/TmxPoint.h
   PRIVATE src/TmxPolygon.cpp
   PRIVATE include/TmxPolygon.h
   PRIVATE src/TmxPolyline.cpp
@@ -100,12 +107,9 @@ target_include_directories(tmxparser PUBLIC
   $<INSTALL_INTERFACE:include>
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>)
 
-target_compile_options(tmxparser
-  PRIVATE -pedantic
-  PRIVATE -Wall)
-
 if(CMAKE_COMPILER_IS_GNUCXX)
   target_compile_options(tmxparser
+    PRIVATE -pedantic
     PRIVATE -Werror=strict-prototypes
     PRIVATE -Werror=old-style-definition
     PRIVATE -Werror=missing-prototypes)
@@ -119,7 +123,7 @@ if(NOT USE_MINIZ)
 endif()
 
 target_compile_features(tmxparser
-  PRIVATE cxx_std_11)
+  PRIVATE cxx_std_20)
 
 target_link_libraries(tmxparser
   PRIVATE tinyxml2::tinyxml2)
@@ -168,17 +172,49 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tmxparserConfig.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tmxparser)
 
 if(BUILD_TESTS)
-  add_executable(run_tests test/test.cpp)
-  target_compile_options(run_tests
-          PRIVATE -pedantic
-          PRIVATE -Werror
-          PRIVATE -Wall
-          PRIVATE -g)
-  target_compile_features(run_tests
-          PRIVATE cxx_std_11)
-  target_link_libraries(run_tests tmxparser tinyxml2)
-  file(COPY test/example
-       DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    add_executable(run_tests test/test.cpp)
+
+    if(CMAKE_COMPILER_IS_GNUCXX)
+        target_compile_options(run_tests
+            PRIVATE -pedantic
+            PRIVATE -Werror
+            PRIVATE -Wall
+            PRIVATE -g)
+    endif()
+
+    target_compile_features(run_tests PRIVATE cxx_std_20)
+    target_link_libraries(run_tests tmxparser tinyxml2::tinyxml2)
+    file(COPY test/example DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endif()
+
+if(BUILD_GTESTS)
+    include(FetchContent)
+    FetchContent_Declare(
+      googletest
+      URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+    )
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
+
+    enable_testing()
+
+    add_executable(
+        tmx_gtests
+        gtests/gtests_polygon.cpp
+        gtests/gtests_property.cpp
+        gtests/gtests_tileset.cpp
+        gtests/gtests_tmx.cpp
+    )
+    target_link_libraries(
+        tmx_gtests
+        GTest::gtest_main
+        tmxparser
+        tinyxml2::tinyxml2
+    )
+
+    include(GoogleTest)
+    gtest_discover_tests(tmx_gtests)
 endif()
 
 if(BUILD_DOCS)

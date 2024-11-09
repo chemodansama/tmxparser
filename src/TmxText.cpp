@@ -28,53 +28,45 @@
 
 #include "TmxText.h"
 
-#include <cstdlib>
+#include "TmxUtil.h"
 
 namespace Tmx
 {
-    Text::Text()
-    : contents(""), font_family("sans-serif"), pixel_size(16), wrap(false), color(nullptr), bold(false),
-      italic(false), underline(false), strikeout(false), kerning(true),
-      horizontal_alignment(LEFT), vertical_alignment(TOP)
+    namespace
     {
+        auto ParseHorizontalAlignment(const std::string_view s)
+        {
+            return
+                s == "left"   ? LEFT :
+                s == "center" ? HCENTER :
+                s == "right"  ? RIGHT
+                              : LEFT;
+        }
+
+        auto ParseVerticalAlignment(const std::string_view s)
+        {
+            return
+                s == "top"    ? TOP :
+                s == "center" ? VCENTER :
+                s == "bottom" ? BOTTOM
+                              : TOP;
+        }
     }
 
-    void Text::Parse(const tinyxml2::XMLNode *textNode)
+    Text::Text(const tinyxml2::XMLElement *data)
+        : contents{ data->GetText() ? std::string{ data->GetText() } : std::string{} }
+        , font_family{ Util::ParseOrDefault(data, "fontfamily",
+            [](auto attribute) { return std::string(attribute); }, "sans-serif") }
+        , pixel_size{ data->IntAttribute("pixelsize", 16) }
+        , color{ Util::ParseOrDefault(data, "color", [](auto attribute) { return Color(attribute); }) }
+        , wrap{ data->BoolAttribute("wrap", false) }
+        , bold{ data->BoolAttribute("bold", false) }
+        , italic{ data->BoolAttribute("italic", false) }
+        , underline{ data->BoolAttribute("underline", false) }
+        , strikeout{ data->BoolAttribute("strikeout", false) }
+        , kerning{ data->BoolAttribute("kerning", true) }
+        , horizontal_alignment{ Util::ParseOrDefault(data, "halign", &ParseHorizontalAlignment) }
+        , vertical_alignment{ Util::ParseOrDefault(data, "valign", &ParseVerticalAlignment) }
     {
-        auto textElement = textNode->ToElement();
-
-        contents = std::string(textElement->GetText() ? textElement->GetText() : "");
-        if(textElement->FindAttribute("fontfamily"))
-            font_family = std::string(textElement->Attribute("fontfamily"));
-        textElement->QueryIntAttribute("pixelsize", &pixel_size);
-        textElement->QueryBoolAttribute("wrap", &wrap);
-        textElement->QueryBoolAttribute("bold", &bold);
-        textElement->QueryBoolAttribute("italic", &italic);
-        textElement->QueryBoolAttribute("underline", &underline);
-        textElement->QueryBoolAttribute("strikeout", &strikeout);
-        textElement->QueryBoolAttribute("kerning", &kerning);
-
-        if(textElement->FindAttribute("halign")) {
-            auto ha_str = std::string(textElement->Attribute("halign"));
-            if(ha_str == "left")
-                horizontal_alignment = LEFT;
-            else if(ha_str == "center")
-                horizontal_alignment = HCENTER;
-            else if(ha_str == "right")
-                horizontal_alignment = RIGHT;
-        }
-
-        if(textElement->FindAttribute("valign")) {
-            auto va_str = std::string(textElement->Attribute("valign"));
-            if(va_str == "top")
-                vertical_alignment = TOP;
-            else if(va_str == "center")
-                vertical_alignment = VCENTER;
-            else if(va_str == "bottom")
-                vertical_alignment = BOTTOM;
-        }
-
-        if(textElement->FindAttribute("color"))
-            color = Color(textElement->Attribute("color"));
     }
 }

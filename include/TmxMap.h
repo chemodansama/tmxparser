@@ -27,6 +27,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -121,23 +122,13 @@ namespace Tmx
     //-------------------------------------------------------------------------
     class Map
     {
-    private:
-        // Prevent copy constructor.
-        Map(const Map &_map);
-
     public:
-        Map();
-        ~Map();
-
         /// Read a file and parse it.
         /// Note: use '/' instead of '\\' as it is using '/' to find the path.
-        void ParseFile(const std::string &fileName);
+        static Map ParseFile(const std::string &fileName);
 
         /// Parse text containing TMX formatted XML.
-        void ParseText(const std::string &text, const std::string &path = "");
-
-        /// Get the filename used to read the map.
-        const std::string &GetFilename() const { return file_name; }
+        static Map ParseText(const std::string &text, const std::string &path = "");
 
         /// Get a path to the directory of the map file if any.
         const std::string &GetFilepath() const { return file_path; }
@@ -178,47 +169,53 @@ namespace Tmx
         /// Get the hexside length.
         int GetHexsideLength() const { return hexside_length; }
 
+        double GetParallaxOriginX() const { return parallaxOriginX; }
+        double GetParallaxOriginY() const { return parallaxOriginY; }
+
+        bool IsInfinite() const { return infinite; }
+
         /// Get the layer at a certain index.
-        const Tmx::Layer *GetLayer(int index) const { return layers.at(index); }
+        const Tmx::Layer *GetLayer(int index) const;
 
         /// Get the amount of layers.
-        int GetNumLayers() const { return layers.size(); }
+        int GetNumLayers() const;
 
         /// Get the whole layers collection.
-        const std::vector< Tmx::Layer* > &GetLayers() const { return layers; }
+        const std::vector<Tmx::Layer*> &GetLayers() const { return layers; }
 
         /// Get the tile layer at a certain index.
-        const Tmx::TileLayer *GetTileLayer(int index) const { return tile_layers.at(index); }
+        const Tmx::TileLayer *GetTileLayer(int index) const;
 
         /// Get the amount of tile layers.
-        int GetNumTileLayers() const { return tile_layers.size(); }
+        int GetNumTileLayers() const;
 
         /// Get the whole collection of tile layers.
-        const std::vector< Tmx::TileLayer* > &GetTileLayers() const { return tile_layers; }
+        const std::vector<Tmx::TileLayer> &GetTileLayers() const { return tile_layers; }
 
         /// Get the object group at a certain index.
-        const Tmx::ObjectGroup *GetObjectGroup(int index) const { return object_groups.at(index); }
+        const Tmx::ObjectGroup *GetObjectGroup(int index) const;
 
         /// Get the amount of object groups.
-        int GetNumObjectGroups() const { return object_groups.size(); }
+        int GetNumObjectGroups() const;
 
         /// Get the whole collection of object groups.
-        const std::vector< Tmx::ObjectGroup* > &GetObjectGroups() const { return object_groups; }
+        const std::vector<Tmx::ObjectGroup> &GetObjectGroups() const;
 
-        std::unordered_map< std::string, Tmx::Object* > &GetTemplates() { return templates; }
+        std::unordered_map<std::string, Tmx::Object> &GetTemplates() { return templates; }
 
         /// Get the image layer at a certain index.
-        const Tmx::ImageLayer *GetImageLayer(int index) const { return image_layers.at(index); }
+        const Tmx::ImageLayer *GetImageLayer(int index) const;
 
         /// Get the amount of image layers.
-        int GetNumImageLayers() const { return image_layers.size(); }
+        int GetNumImageLayers() const;
 
         /// Get the whole collection of image layers.
-        const std::vector< Tmx::ImageLayer* > &GetImageLayers() const { return image_layers; }
+        const std::vector<Tmx::ImageLayer> &GetImageLayers() const { return image_layers; }
 
-        const Tmx::GroupLayer *GetGroupLayer(int index) const { return group_layers.at(index); }
-        int GetNumGroupLayers() const { return group_layers.size(); }
-        const std::vector< Tmx::GroupLayer* > &GetGroupLayers() const { return group_layers; }
+        const Tmx::GroupLayer *GetGroupLayer(int index) const;
+        int GetNumGroupLayers() const;
+
+        const std::vector<Tmx::GroupLayer> &GetGroupLayers() const { return group_layers; }
 
         /// Find the tileset index for a tileset using a tile gid.
         int FindTilesetIndex(int gid) const;
@@ -227,13 +224,13 @@ namespace Tmx
         const Tmx::Tileset *FindTileset(int gid) const;
 
         /// Get a tileset by an index.
-        const Tmx::Tileset *GetTileset(int index) const { return tilesets.at(index); }
+        const Tmx::Tileset *GetTileset(int index) const;
 
         /// Get the amount of tilesets.
-        int GetNumTilesets() const { return tilesets.size(); }
+        int GetNumTilesets() const;
 
         /// Get the collection of tilesets.
-        const std::vector< Tmx::Tileset* > &GetTilesets() const { return tilesets; }
+        const std::vector<Tmx::Tileset> &GetTilesets() const { return tilesets; }
 
         /// Get whether there was an error or not.
         bool HasError() const { return has_error; }
@@ -248,39 +245,43 @@ namespace Tmx
         const Tmx::PropertySet &GetProperties() const { return properties; }
 
     private:
-        std::string file_name;
+        Map(std::string errorText);
+        Map(const tinyxml2::XMLElement *data, std::string filePath);
+
         std::string file_path;
 
         Tmx::Color background_color;
 
-        double version;
-        Tmx::MapOrientation orientation;
-        Tmx::MapRenderOrder render_order;
-        Tmx::MapStaggerAxis stagger_axis;
-        Tmx::MapStaggerIndex stagger_index;
+        double version{ 0.0 };
+        Tmx::MapOrientation orientation{ Tmx::MapOrientation::TMX_MO_ORTHOGONAL };
+        Tmx::MapRenderOrder render_order{ Tmx::MapRenderOrder::TMX_RIGHT_DOWN };
+        Tmx::MapStaggerAxis stagger_axis{ Tmx::MapStaggerAxis::TMX_SA_NONE };
+        Tmx::MapStaggerIndex stagger_index{ Tmx::MapStaggerIndex::TMX_SI_NONE };
 
-        int width;
-        int height;
-        int tile_width;
-        int tile_height;
-        int next_object_id;
-        int hexside_length;
+        int width{ 0 };
+        int height{ 0 };
+        int tile_width{ 0 };
+        int tile_height{ 0 };
+        int next_object_id{ 0 };
+        int hexside_length{ 0 };
 
-        std::vector< Tmx::Layer* > layers;
-        std::vector< Tmx::TileLayer* > tile_layers;
-        std::vector< Tmx::ImageLayer* > image_layers;
-        std::vector< Tmx::ObjectGroup* > object_groups;
-        std::vector< Tmx::GroupLayer* > group_layers;
-        std::vector< Tmx::Tileset* > tilesets;
-        std::unordered_map< std::string, Tmx::Object* > templates;
+        double parallaxOriginX{ 0.0f };
+        double parallaxOriginY{ 0.0f };
 
-        bool has_error;
-        unsigned char error_code;
+        bool infinite{ false };
+
+        std::vector<Tmx::Layer*> layers;
+        std::vector<Tmx::TileLayer> tile_layers;
+        std::vector<Tmx::ImageLayer> image_layers;
+        std::vector<Tmx::ObjectGroup> object_groups;
+        std::vector<Tmx::GroupLayer> group_layers;
+        std::vector<Tmx::Tileset> tilesets;
+        std::unordered_map<std::string, Tmx::Object> templates;
+
+        bool has_error{ false };
+        unsigned char error_code{ 0 };
         std::string error_text;
 
         Tmx::PropertySet properties;
-
-        // Parse a 'map' node.
-        void Parse(tinyxml2::XMLNode *mapNode);
     };
 }

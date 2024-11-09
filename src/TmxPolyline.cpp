@@ -28,30 +28,32 @@
 
 #include "TmxPolyline.h"
 
-#include <cstdlib> 
+#include "TmxUtil.h"
 
 namespace Tmx 
 {
-    Polyline::Polyline()
-        : points()
+    namespace
+    {
+        std::string_view GetPointsAttribute(const tinyxml2::XMLElement *data)
+        {
+            if (const auto v = data->Attribute("points"))
+            {
+                return v;
+            }
+
+            return {};
+        }
+    }
+
+    Polyline::Polyline(const tinyxml2::XMLElement *data)
+        : Polyline{ GetPointsAttribute(data) }
     {
     }
 
-    void Polyline::Parse(const tinyxml2::XMLNode *polylineNode)
+    Polyline::Polyline(const std::string_view &data)
     {
-        char *pointsLine = strdup(polylineNode->ToElement()->Attribute("points"));
-        
-        char *token = strtok(pointsLine, " ");
-        while (token)
-        {
-            Point point;
-            sscanf(token, "%f,%f", &point.x, &point.y);
-
-            points.push_back(point);
-
-            token = strtok(0, " ");
-        }
-
-        free(pointsLine);
+        Util::Iterate(data, ' ', [this](auto first, auto last) {
+            points.push_back(ParsePoint(std::string_view{ first, last }));
+        });
     }
 }

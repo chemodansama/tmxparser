@@ -24,103 +24,53 @@
 
 #include "TmxGroupLayer.h"
 
-#include <cassert> //RJCB
-#include <cstdlib>
-#include <cstring>
-
 #include "TmxImageLayer.h"
 #include "TmxLayer.h"
 #include "TmxObjectGroup.h"
 #include "TmxTileLayer.h"
 
-namespace Tmx {
-
-    GroupLayer::GroupLayer(Tmx::Map *_map)
-        : Layer(_map, std::string(), 0, 0, 0, 0, 1.0f, true, TMX_LAYERTYPE_GROUP_LAYER)
+namespace Tmx
+{
+    namespace
     {
     }
 
-    GroupLayer::~GroupLayer()
+    GroupLayer::GroupLayer(Tmx::Map *_map, const tinyxml2::XMLElement *data)
+        : Layer{ _map, data->IntAttribute("x"), data->IntAttribute("y"), 0, 0,
+            TMX_LAYERTYPE_GROUP_LAYER, data }
+        , offsetX{ data->IntAttribute("offsetx") }
+        , offsetY{ data->IntAttribute("offsety") }
     {
-      for(auto c : children)
-        delete c;
-    }
-
-    void GroupLayer::Parse(const tinyxml2::XMLNode *groupLayerNode)
-    {
-        Layer::Parse(groupLayerNode);
-
-        const tinyxml2::XMLElement *groupLayerElem = groupLayerNode->ToElement();
-
-        // Read all the attributes into local variables.
-        groupLayerElem->QueryIntAttribute("x", &x);
-        groupLayerElem->QueryIntAttribute("y", &y);
-
-        groupLayerElem->QueryIntAttribute("offsetx", &offsetX);
-        groupLayerElem->QueryIntAttribute("offsety", &offsetY);
-
-        groupLayerElem->QueryFloatAttribute("opacity", &opacity);
-        groupLayerElem->QueryBoolAttribute("visible", &visible);
-
         // Parse the group.
-        const tinyxml2::XMLNode *child = groupLayerElem->FirstChild();
-        assert(child); //RJCB
-
-        while(child != nullptr) {
-            if(strncmp(child->Value(), "group", 5) == 0) {
-                auto groupLayer = new GroupLayer(map);
-                groupLayer->Parse(child);
-                AddChild(groupLayer);
-            }
-            else if(strncmp(child->Value(), "layer", 5) == 0) {
-                auto tileLayer = new TileLayer(map);
-                tileLayer->Parse(child);
-                AddChild(tileLayer);
-            }
-            else if(strncmp(child->Value(), "objectgroup", 11) == 0) {
-                auto objectGroup = new ObjectGroup(map);
-                objectGroup->Parse(child);
-                AddChild(objectGroup);
-            }
-            else if(strncmp(child->Value(), "imagelayer", 10) == 0) {
-                auto imageLayer = new ImageLayer(map);
-                imageLayer->Parse(child);
-                AddChild(imageLayer);
-            }
-            child = child->NextSiblingElement();
-        }
-
-        // Parse the properties if any.
-        const tinyxml2::XMLNode *propertiesNode = groupLayerElem->FirstChildElement("properties");
-
-        if (propertiesNode)
+        for (auto child = data->FirstChildElement(); child; child = child->NextSiblingElement())
         {
-            properties.Parse(propertiesNode);
+            if (strncmp(child->Value(), "group", 5) == 0)
+            {
+                children.push_back(std::make_unique<GroupLayer>(map, child));
+            }
+            else if (strncmp(child->Value(), "layer", 5) == 0)
+            {
+                children.push_back(std::make_unique<TileLayer>(map, child));
+            }
+            else if (strncmp(child->Value(), "objectgroup", 11) == 0)
+            {
+                children.push_back(std::make_unique<ObjectGroup>(map, child));
+            }
+            else if (strncmp(child->Value(), "imagelayer", 10) == 0)
+            {
+                children.push_back(std::make_unique<ImageLayer>(map, child));
+            }
         }
     }
 
-    void GroupLayer::AddChild(Tmx::Layer* childLayer)
+    Tmx::Layer* GroupLayer::GetChild(const int index) const
     {
-        children.push_back(childLayer);
+        return children.at(index).get();
     }
 
-    Tmx::Layer* GroupLayer::GetChild(const int index) const {
-      return children.at(index);
-    }
-
-    const std::vector<Tmx::Layer*> GroupLayer::GetChildren() const noexcept
+    int GroupLayer::GetNumChildren() const noexcept
     {
-        return children;
-    }
-
-    int GroupLayer::GetNumChildren() const noexcept {
         return children.size();
-    }
-
-    void GroupLayer::SetOffset(const int offsetX, const int offsetY)
-    {
-        this->offsetX = offsetX;
-        this->offsetY = offsetY;
     }
 
     int GroupLayer::GetOffsetX() const noexcept

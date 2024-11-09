@@ -24,49 +24,20 @@
 
 #include "TmxImageLayer.h"
 
-#include <cassert> //RJCB
-#include <cstdlib>
-
-#include "TmxImage.h"
-#include "TmxLayer.h"
-
-using std::vector;
-using std::string;
-
 namespace Tmx
 {
-    ImageLayer::ImageLayer(Tmx::Map *_map)
-        : Layer(_map, std::string(), 0, 0, 0, 0, 1.0f, true, TMX_LAYERTYPE_IMAGE_LAYER)
+    namespace
     {
+        auto ParseImage(const tinyxml2::XMLElement *data)
+        {
+            return data ? std::make_unique<Image>(data) : nullptr;
+        }
     }
 
-    void ImageLayer::Parse(const tinyxml2::XMLNode *imageLayerNode)
+    ImageLayer::ImageLayer(Tmx::Map *_map, const tinyxml2::XMLElement *data)
+        : Layer{ _map, data->IntAttribute("x"), data->IntAttribute("y"), 0, 0,
+            TMX_LAYERTYPE_IMAGE_LAYER, data}
+        , image{ ParseImage(data->FirstChildElement("image")) }
     {
-        Layer::Parse(imageLayerNode);
-
-        const tinyxml2::XMLElement *imageLayerElem = imageLayerNode->ToElement();
-
-        // Read all the attributes into local variables.
-        imageLayerElem->QueryIntAttribute("x", &x);
-        imageLayerElem->QueryIntAttribute("y", &y);
-
-        imageLayerElem->QueryFloatAttribute("opacity", &opacity);
-        imageLayerElem->QueryBoolAttribute("visible", &visible);
-
-        // Parse the image if there is one.
-        const tinyxml2::XMLNode *imageNode = imageLayerElem->FirstChildElement("image");
-
-        if (imageNode)
-        {
-            image = std::make_unique<Image>(imageNode);
-        }
-
-        // Parse the properties if any.
-        const tinyxml2::XMLNode *propertiesNode = imageLayerElem->FirstChildElement("properties");
-
-        if (propertiesNode)
-        {
-            properties.Parse(propertiesNode);
-        }
     }
 }

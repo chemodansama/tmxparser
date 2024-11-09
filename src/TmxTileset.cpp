@@ -32,17 +32,19 @@
 
 #include "TmxImage.h"
 #include "TmxMap.h"
-#include "TmxTerrain.h"
 #include "TmxTerrainArray.h"
-#include "TmxTile.h"
-#include "TmxTileOffset.h"
 
-using std::vector;
-using std::string;
-
-namespace Tmx 
+namespace Tmx
 {
-    Tileset::Tileset() 
+    namespace
+    {
+        auto CreateImage(const tinyxml2::XMLElement *data)
+        {
+            return data ? std::make_unique<Image>(data) : nullptr;
+        }
+    }
+
+    Tileset::Tileset(const std::string &file_path, const tinyxml2::XMLNode *tilesetNode)
         : first_gid(0)
         , name()
         , tile_width(0)
@@ -51,56 +53,10 @@ namespace Tmx
         , spacing(0)
         , tile_count(0)
         , columns(0)
-        , tileOffset(NULL)
-        , image(NULL)
+        , tileOffset{ tilesetNode->FirstChildElement("tileoffset") }
+        , image{ CreateImage(tilesetNode->FirstChildElement("image")) }
         , tiles()
-    {
-    }
-
-    Tileset::~Tileset() 
-    {
-        // Delete the tile offset from memory if allocated.
-        if (tileOffset)
-        {
-            delete tileOffset;
-            tileOffset = NULL;
-        }
-
-        // Delete the image from memory if allocated.
-        if (image)
-        {
-            delete image;
-            image = NULL;
-        }
-
-        // Iterate through all of the terrain types in the tileset and delete each of them.
-        vector< Terrain* >::iterator ttIter;
-        for (ttIter = terrainTypes.begin(); ttIter != terrainTypes.end(); ++ttIter) 
-        {
-            Terrain *terrainType = (*ttIter);
-            
-            if (terrainType) 
-            {
-                delete terrainType;
-                terrainType = NULL;
-            }
-        }
-
-        // Iterate through all of the tiles in the tileset and delete each of them.
-        vector< Tile* >::iterator tIter;
-        for (tIter = tiles.begin(); tIter != tiles.end(); ++tIter) 
-        {
-            Tile *tile = (*tIter);
-            
-            if (tile) 
-            {
-                delete tile;
-                tile = NULL;
-            }
-        }
-    }
-
-    void Tileset::Parse(const tinyxml2::XMLNode *tilesetNode, const std::string& file_path)
+        , properties{ tilesetNode->FirstChildElement("properties") }
     {
         const tinyxml2::XMLElement *tilesetElem = tilesetNode->ToElement();
 
@@ -160,56 +116,29 @@ namespace Tmx
         columns = tilesetElem->IntAttribute("columns");
         name = tilesetElem->Attribute("name");
 
-        // Parse the tile offset, if it exists.
-        const tinyxml2::XMLNode *tileOffsetNode = tilesetNode->FirstChildElement("tileoffset");
-        if (tileOffsetNode)
-        {
-            tileOffset = new TileOffset();
-            tileOffset->Parse(tileOffsetNode);
-        }
-
         // Parse the terrain types if any.
-        const tinyxml2::XMLNode *terrainTypesNode = tilesetNode->FirstChildElement("terraintypes");
-        if (terrainTypesNode) 
+        if (const auto terrainTypesNode = tilesetNode->FirstChildElement("terraintypes"))
         {
-            TerrainArray terrainArray;
-            terrainArray.Parse(&terrainTypes, terrainTypesNode);
-        }
-
-        // Parse the image.
-        const tinyxml2::XMLNode *imageNode = tilesetNode->FirstChildElement("image");
-        if (imageNode)
-        {
-            image = new Image(imageNode);
+             TerrainArray::Parse(&terrainTypes, terrainTypesNode);
         }
 
         // Iterate through all of the tile elements and parse each.
-        const tinyxml2::XMLNode *tileNode = tilesetNode->FirstChildElement("tile");
+        auto tileNode = tilesetNode->FirstChildElement("tile");
         for (int tId = 0; tileNode; ++tId)
         {
-            Tile* tile = new Tile(tId);
-            tile->Parse(tileNode);
-            tiles.push_back(tile);
-
+            tiles.emplace_back(tileNode);
             tileNode = tileNode->NextSiblingElement("tile");
-        }
-
-        // Parse the properties if any.
-        const tinyxml2::XMLNode *propertiesNode = tilesetNode->FirstChildElement("properties");
-        if (propertiesNode)
-        {
-            properties.Parse(propertiesNode);
         }
     }
 
-    const Tile *Tileset::GetTile(int index) const 
+    const Tile *Tileset::GetTile(int index) const
     {
-        for (unsigned int i = 0; i < tiles.size(); ++i) 
+        for (size_t i = 0; i < tiles.size(); ++i)
         {
-            if (tiles.at(i)->GetId() == index) 
-                return tiles.at(i);
+            if (tiles.at(i).GetId() == index)
+                return &tiles.at(i);
         }
 
-        return NULL;
+        return nullptr;
     }
 }

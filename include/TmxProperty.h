@@ -28,6 +28,7 @@
 #pragma once
 
 #include <string>
+#include <variant>
 
 #include <tinyxml2.h>
 
@@ -56,7 +57,13 @@ namespace Tmx
         TMX_PROPERTY_COLOR,
 
         /// A file property
-        TMX_PROPERTY_FILE
+        TMX_PROPERTY_FILE,
+
+        /// An object property
+        TMX_PROPERTY_OBJECT,
+
+        /// A class property
+        TMX_PROPERTY_CLASS,
     };
 
     //-------------------------------------------------------------------------
@@ -65,7 +72,7 @@ namespace Tmx
     class Property
     {
     public:
-        Property(const tinyxml2::XMLElement *propertyElem);
+        Property(const tinyxml2::XMLElement *data);
 
         /// Get the type of the property (default: TMX_PROPERTY_STRING)
         PropertyType GetType() const { return type; }
@@ -74,10 +81,10 @@ namespace Tmx
         bool IsOfType(PropertyType propertyType) const { return GetType() == propertyType; }
 
         /// Return the value of the property.
-        const std::string &GetValue() const { return value; }
+        const std::string &GetValue() const { return std::get<std::string>(value); }
 
         /// Return whether the value is empty or was not specified.
-        bool IsValueEmpty() const { return value.empty(); }
+        bool IsValueEmpty() const { return isEmpty; }
 
         /// Convert the value to a boolean and return it (or the default value if not a boolean.)
         bool GetBoolValue(bool defaultValue = false) const;
@@ -89,10 +96,12 @@ namespace Tmx
         float GetFloatValue(float defaultValue = 0.0f) const;
 
         /// Convert the value to a color and return it (or the default value if not a color).
-        Tmx::Color GetColorValue(Tmx::Color defaultValue = Tmx::Color()) const;
+        Tmx::Color GetColorValue(const Tmx::Color &defaultValue = Tmx::Color()) const;
+
     private:
         PropertyType type;
-        std::string value;
+        bool isEmpty{ true };
+        std::variant<std::string, int, float, bool, Tmx::Color> value;
     };
 
     inline bool Property::GetBoolValue(bool defaultValue) const
@@ -100,15 +109,15 @@ namespace Tmx
         if (!IsOfType(TMX_PROPERTY_BOOL))
             return defaultValue;
 
-        return value.compare("true") == 0;
+        return std::get<bool>(value);
     }
 
     inline int Property::GetIntValue(int defaultValue) const
     {
-        if (!IsOfType(TMX_PROPERTY_INT))
+        if (!IsOfType(TMX_PROPERTY_INT) && !IsOfType(TMX_PROPERTY_OBJECT))
             return defaultValue;
 
-        return std::stoi(value);
+        return std::get<int>(value);
     }
 
     inline float Property::GetFloatValue(float defaultValue) const
@@ -116,14 +125,14 @@ namespace Tmx
         if (!IsOfType(TMX_PROPERTY_FLOAT))
             return defaultValue;
 
-        return std::stof(value);
+        return std::get<float>(value);
     }
 
-    inline Tmx::Color Property::GetColorValue(Tmx::Color defaultValue) const
+    inline Tmx::Color Property::GetColorValue(const Tmx::Color &defaultValue) const
     {
         if (!IsOfType(TMX_PROPERTY_COLOR))
             return defaultValue;
 
-        return Tmx::Color(value);
+        return std::get<Tmx::Color>(value);
     }
 }

@@ -27,16 +27,14 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include <map>
-#include <string>
 #include <vector>
 
 #include <tinyxml2.h>
 
+#include "TmxTerrain.h"
+
 namespace Tmx
 {
-    class Terrain;
-
     //-----------------------------------------------------------------------------
     /// Class to parse terrain types, which can be referenced from the
     /// terrain attribute of the tileset/tile element.
@@ -44,11 +42,8 @@ namespace Tmx
     class TerrainArray
     {
     public:
-        TerrainArray();
-        ~TerrainArray();
-
         /// Parse a node containing all the terrain nodes.
-        void Parse(std::vector< Tmx::Terrain* > *terrainTypes, const tinyxml2::XMLNode *terrainArrayNode);
-
+        static void Parse(std::vector<Tmx::Terrain> *terrainTypes,
+            const tinyxml2::XMLElement *data);
     };
 }

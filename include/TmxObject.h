@@ -27,18 +27,20 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+#include <memory>
 #include <string>
 
 #include <tinyxml2.h>
 
 #include "TmxPropertySet.h"
 
+#include "TmxEllipse.h"
+#include "TmxPolygon.h"
+#include "TmxPolyline.h"
+#include "TmxText.h"
+
 namespace Tmx
 {
-    class Ellipse;
-    class Polygon;
-    class Polyline;
-    class Text;
     class Map;
 
     //-------------------------------------------------------------------------
@@ -47,11 +49,8 @@ namespace Tmx
     class Object
     {
     public:
-        Object();
-        ~Object();
-
-        /// Parse an object node.
-        void Parse(const tinyxml2::XMLNode *objectNode, Map *map);
+        Object() = default;
+        Object(const tinyxml2::XMLElement *data, Map *map);
 
         /// Get the name of the object.
         const std::string &GetName() const { return name; }
@@ -84,38 +83,40 @@ namespace Tmx
         bool IsVisible() const { return visible; }
 
         /// Get the ellipse.
-        const Tmx::Ellipse *GetEllipse() const { return ellipse; }
+        const Tmx::Ellipse *GetEllipse() const { return ellipse.get(); }
 
         /// Get the Polygon.
-        const Tmx::Polygon *GetPolygon() const { return polygon; }
+        const Tmx::Polygon *GetPolygon() const { return polygon.get(); }
 
         /// Get the Polyline.
-        const Tmx::Polyline *GetPolyline() const { return polyline; }
+        const Tmx::Polyline *GetPolyline() const { return polyline.get(); }
 
         /// Get the Text.
-        const Tmx::Text *GetText() const { return text; }
+        const Tmx::Text *GetText() const { return text.get(); }
 
         /// Get the property set.
         const Tmx::PropertySet &GetProperties() const { return properties; }
 
     private:
+        Object(const tinyxml2::XMLElement *data, const Tmx::Object *pattern);
+
         std::string name;
         std::string type;
 
-        int x;
-        int y;
-        int width;
-        int height;
-        int gid;
-        int id;
+        int x{ 0 };
+        int y{ 0 };
+        int width{ 0 };
+        int height{ 0 };
+        int gid{ 0 };
+        int id{ 0 };
 
-        double rotation;
-        bool visible;
+        double rotation{ 0.0f };
+        bool visible{ true };
 
-        Tmx::Ellipse *ellipse;
-        Tmx::Polygon *polygon;
-        Tmx::Polyline *polyline;
-        Tmx::Text *text;
+        std::unique_ptr<Tmx::Ellipse> ellipse;
+        std::unique_ptr<Tmx::Polygon> polygon;
+        std::unique_ptr<Tmx::Polyline> polyline;
+        std::unique_ptr<Tmx::Text> text;
 
         Tmx::PropertySet properties;
     };

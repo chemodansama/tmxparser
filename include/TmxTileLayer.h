@@ -28,6 +28,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include <tinyxml2.h>
 
@@ -65,17 +66,9 @@ namespace Tmx
     //-------------------------------------------------------------------------
     class TileLayer : public Tmx::Layer
     {
-    private:
-        /// Prevent copy constructor.
-        TileLayer(const TileLayer &_layer);
-
     public:
         /// Construct a TileLayer on the given map.
-        TileLayer(Tmx::Map *_map);
-        ~TileLayer();
-
-        /// Parse a tile layer node.
-        void Parse(const tinyxml2::XMLNode *tileLayerNode);
+        TileLayer(Tmx::Map *_map, const tinyxml2::XMLElement *data);
 
         /// Pick a specific tile id from the list.
         unsigned GetTileId(int x, int y) const { return tile_map[y * width + x].id; }
@@ -87,16 +80,13 @@ namespace Tmx
         int GetTileTilesetIndex(int x, int y) const { return tile_map[y * width + x].tilesetId; }
 
         /// Get whether a tile is flipped horizontally.
-        bool IsTileFlippedHorizontally(int x, int y) const 
-        { return tile_map[y * width + x].flippedHorizontally; }
+        bool IsTileFlippedHorizontally(int x, int y) const { return tile_map[y * width + x].flippedHorizontally; }
 
         /// Get whether a tile is flipped vertically.
-        bool IsTileFlippedVertically(int x, int y) const 
-        { return tile_map[y * width + x].flippedVertically; }
+        bool IsTileFlippedVertically(int x, int y) const { return tile_map[y * width + x].flippedVertically; }
 
         /// Get whether a tile is flipped diagonally.
-        bool IsTileFlippedDiagonally(int x, int y) const
-        { return tile_map[y * width + x].flippedDiagonally; }
+        bool IsTileFlippedDiagonally(int x, int y) const { return tile_map[y * width + x].flippedDiagonally; }
 
         /// Get the tile at the given position.
         const Tmx::MapTile& GetTile(int x, int y) const { return tile_map[y * width + x]; }
@@ -116,11 +106,11 @@ namespace Tmx
         float GetOffsetY() const { return offsetY; }
 
     private:
-        void ParseXML(const tinyxml2::XMLNode *dataNode);
-        void ParseBase64(const std::string &innerText);
+        void ParseXML(const tinyxml2::XMLNode *data);
+        void ParseBase64(std::string innerText);
         void ParseCSV(const std::string &innerText);
 
-        Tmx::MapTile *tile_map;
+        std::vector<Tmx::MapTile> tile_map;
 
         Tmx::TileLayerEncodingType encoding;
         Tmx::TileLayerCompressionType compression;

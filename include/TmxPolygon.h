@@ -27,6 +27,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+#include <string_view>
 #include <vector>
 
 #include <tinyxml2.h>
@@ -41,18 +42,16 @@ namespace Tmx
     class Polygon
     {
     public:
-        Polygon();
-
-        /// Parse the polygon node.
-        void Parse(const tinyxml2::XMLNode *polygonNode);
+        Polygon(const tinyxml2::XMLElement *data);
+        Polygon(std::string_view data);
 
         /// Get one of the vertices.
-        const Tmx::Point &GetPoint(int index) const { return points[index]; }
+        const Tmx::Point &GetPoint(int index) const { return points[static_cast<size_t>(index)]; }
 
         /// Get the number of vertices.
-        int GetNumPoints() const { return points.size(); }
+        int GetNumPoints() const { return static_cast<int>(points.size()); }
 
     private:
-        std::vector< Tmx::Point > points;
+        std::vector<Tmx::Point> points;
     };
 }

@@ -23,6 +23,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -49,12 +50,8 @@ namespace Tmx
     {
     public:
         /// Construct a new tile with the given id.
-        Tile(int id);
-        Tile();
-        ~Tile();
-
-        /// Parse a tile node.
-        void Parse(const tinyxml2::XMLNode *tileNode);
+        Tile(const tinyxml2::XMLElement *data);
+        Tile() = default;
 
         /// Get the Id. (relative to the tileset)
         int GetId() const
@@ -81,7 +78,7 @@ namespace Tmx
         /// Returns the tile image if defined.
         const Tmx::Image* GetImage() const
         {
-            return image;
+            return image.get();
         }
 
         /// Returns the object type of the tile.
@@ -102,23 +99,31 @@ namespace Tmx
             return properties;
         }
 
-				//// Get the object group, which contains additional tile properties
-				const Tmx::ObjectGroup *GetObjectGroup() const
-				{
-						return objectGroup;
-				}
+        //// Get the object group, which contains additional tile properties
+        const Tmx::ObjectGroup *GetObjectGroup() const
+        {
+            return objectGroup.get();
+        }
 
-				//// Get the object group's properties, convenience function
-				const Tmx::PropertySet &GetObjectGroupProperties() const
-				{
-						if (!objectGroup) throw std::runtime_error ("Tile has no ObjectGroup on attempt to get ObjectGroup properties.  Cannot return null ref.");
-						return objectGroup->GetProperties();
-				}
+        //// Get the object group's properties, convenience function
+        const Tmx::PropertySet &GetObjectGroupProperties() const
+        {
+            if (!objectGroup)
+            {
+                throw std::runtime_error("Tile has no ObjectGroup on attempt to get "
+                    "ObjectGroup properties.  Cannot return null ref.");
+            }
+            return objectGroup->GetProperties();
+        }
 
         /// Get set of Collision Objects, convenience function
-        std::vector<Tmx::Object*> GetObjects() const
+        const std::vector<Tmx::Object> &GetObjects() const
         {
-						if (!objectGroup) throw std::out_of_range ("Tile has no objectGroup");
+            if (!objectGroup)
+            {
+                throw std::out_of_range("Tile has no objectGroup");
+            }
+
             return objectGroup->GetObjects();
         }
 
@@ -129,32 +134,41 @@ namespace Tmx
         }
 
         /// Get a single object.
-        const Tmx::Object *GetObject(int index) const
+        const Tmx::Object &GetObject(int index) const
         {
-						if (!objectGroup) throw std::out_of_range ("Tile has no objectGroup");
+            if (!objectGroup)
+            {
+                throw std::out_of_range("Tile has no objectGroup");
+            }
+
             return objectGroup->GetObject(index);
         }
 
         /// Get the number of objects in the list.
         int GetNumObjects() const
         {
-						if (!objectGroup) throw std::out_of_range ("Tile has no objectGroup");
+            if (!objectGroup)
+            {
+                throw std::out_of_range("Tile has no objectGroup");
+            }
             return objectGroup->GetNumObjects();
         }
 
     private:
-        int id;
+        int id{ 0 };
 
         Tmx::PropertySet properties;
 
-        bool isAnimated;
-        bool hasObjects;
-				bool hasObjectGroup;
-				Tmx::ObjectGroup *objectGroup;
-        unsigned int totalDuration;
-        std::vector<AnimationFrame> frames;
-        Tmx::Image* image;
         std::string type;
+
+        bool isAnimated{ false };
+        unsigned int totalDuration{ 0 };
+        std::vector<AnimationFrame> frames;
+
+        std::unique_ptr<Tmx::ObjectGroup> objectGroup;
+        bool hasObjects{ false };
+
+        std::unique_ptr<Tmx::Image> image;
     };
 
     //-------------------------------------------------------------------------
@@ -165,15 +179,10 @@ namespace Tmx
     class AnimationFrame
     {
     public:
-        /// This constructor shouldn't be used, ideally.
-        AnimationFrame() :
-                tileID(-1), duration(0)
-        {
-        }
-
         /// Create a new animation frame with a specified tile id and duration.
-        AnimationFrame(int tileID, unsigned int duration) :
-                tileID(tileID), duration(duration)
+        AnimationFrame(int tileID = -1, unsigned int duration = 0)
+            : tileID(tileID)
+            , duration(duration)
         {
         }
 

@@ -32,103 +32,74 @@
 
 namespace Tmx
 {
-    Tile::Tile() :
-            id(0), properties(), isAnimated(false), hasObjects(false), hasObjectGroup(false), objectGroup(NULL), totalDuration(0), image(NULL), type()
+    namespace
     {
-    }
-    Tile::Tile(int id) :
-            id(id), properties(), isAnimated(false), hasObjects(false), hasObjectGroup(false), objectGroup(NULL), totalDuration(0), image(NULL), type()
-    {
-    }
-
-    Tile::~Tile()
-    {
-        if(image)
+        auto ParseType(const tinyxml2::XMLElement *data)
         {
-            delete image;
-            image = NULL;
-        }
-				if (objectGroup)
-				{
-					delete objectGroup;
-					objectGroup = NULL;
-				}
-    }
-
-    void Tile::Parse(const tinyxml2::XMLNode *tileNode)
-    {
-        const tinyxml2::XMLElement *tileElem = tileNode->ToElement();
-
-        // Parse the attributes.
-        id = tileElem->IntAttribute("id");
-
-        // Parse tile type if it has one.
-        if(tileElem->FindAttribute("type"))
-        {
-            type = std::string(tileElem->Attribute("type"));
+            const auto attribute = data->Attribute("type");
+            return attribute ? std::string{ attribute } : std::string{};
         }
 
-        // Parse the properties if any.
-        const tinyxml2::XMLNode *propertiesNode = tileNode->FirstChildElement(
-                "properties");
-
-        if (propertiesNode)
+        auto ParseFrames(const tinyxml2::XMLElement *data, bool *isAnimated,
+            unsigned int *totalDuration)
         {
-            properties.Parse(propertiesNode);
-        }
+            std::vector<AnimationFrame> result;
 
-        // Parse the animation if there is one.
-        const tinyxml2::XMLNode *animationNode = tileNode->FirstChildElement(
-                "animation");
-
-        if (animationNode)
-        {
-            isAnimated = true;
-
-            const tinyxml2::XMLNode *frameNode =
-                    animationNode->FirstChildElement("frame");
-            unsigned int durationSum = 0;
-
-            while (frameNode != NULL)
+            const auto animation = data->FirstChildElement("animation");
+            if (!animation)
             {
-                const tinyxml2::XMLElement *frameElement =
-                        frameNode->ToElement();
-
-                const int tileID = frameElement->IntAttribute("tileid");
-                const unsigned int duration = frameElement->IntAttribute(
-                        "duration");
-
-                frames.push_back(AnimationFrame(tileID, duration));
-                durationSum += duration;
-
-                frameNode = frameNode->NextSiblingElement("frame");
+                return result;
             }
 
-            totalDuration = durationSum;
+            *isAnimated = true;
+            *totalDuration = 0.0f;
+
+            for (auto frame = animation->FirstChildElement("frame"); frame;
+                frame = frame->NextSiblingElement("frame"))
+            {
+                const int tileID = frame->IntAttribute("tileid");
+                const unsigned int duration = frame->IntAttribute("duration");
+
+                result.emplace_back(tileID, duration);
+                *totalDuration += duration;
+            }
+
+            return result;
         }
 
-        const tinyxml2::XMLNode *objectGroupNode = tileNode->FirstChildElement(
-                "objectgroup");
-        if (objectGroupNode)
+        std::unique_ptr<ObjectGroup> ParseObjectGroup(const Tile *tile,
+            const tinyxml2::XMLElement *data)
         {
-						hasObjectGroup = true;
-						//let's only create objectGroup if it's needed, save memory
-						objectGroup = new ObjectGroup(this);
-						objectGroup->Parse(objectGroupNode);
-						if (objectGroup->GetNumObjects() > 0) hasObjects = true;
+            const auto objectGroup = data->FirstChildElement("objectgroup");
+            if (!objectGroup)
+            {
+                return nullptr;
+            }
 
+            //let's only create objectGroup if it's needed, save memory
+            return std::make_unique<ObjectGroup>(tile, objectGroup);
         }
 
-        const tinyxml2::XMLNode *imageNode = tileNode->FirstChildElement("image");
-        if(imageNode)
+        auto ParseImage(const tinyxml2::XMLElement *data)
         {
-            image = new Image(imageNode);
+            const auto imageNode = data->FirstChildElement("image");
+            return imageNode ? std::make_unique<Image>(imageNode) : nullptr;
         }
+    }
 
+    Tile::Tile(const tinyxml2::XMLElement *data)
+        : id{ data->IntAttribute("id") }
+        , properties{ data->FirstChildElement("properties") }
+        , type{ ParseType(data) }
+        , frames{ ParseFrames(data, &isAnimated, &totalDuration) }
+        , objectGroup{ ParseObjectGroup(this, data) }
+        , hasObjects{ objectGroup && objectGroup->GetNumObjects() > 0 }
+        , image{ ParseImage(data) }
+    {
     }
 
     int Tile::GetFrameCount() const
     {
-        return frames.size();
+        return static_cast<int>(frames.size());
     }
 }

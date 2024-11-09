@@ -23,6 +23,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -36,32 +37,24 @@ namespace Tmx
     class Map;
 
     //-------------------------------------------------------------------------
-    /// A class used for holding groups of layers to create a layer heirarchy.
+    /// A class used for holding groups of layers to create a layer hierarchy.
     /// This class has a property set.
     //-------------------------------------------------------------------------
     class GroupLayer : public Tmx::Layer
     {
     public:
         /// Construct an GroupLayer on the given map.
-        GroupLayer(Tmx::Map *_map);
-        ~GroupLayer();
+        GroupLayer(Tmx::Map *_map, const tinyxml2::XMLElement *data);
 
-        /// Parse a GroupLayer element.
-        void Parse(const tinyxml2::XMLNode *groupLayerNode);
+        GroupLayer(GroupLayer &&) = default;
+        GroupLayer& operator=(GroupLayer &&) = default;
 
-        /// Adds a child Layer to the group.
-        void AddChild(Tmx::Layer* childLayer);
+        Tmx::Layer* GetChild(int index) const;
 
-        Tmx::Layer* GetChild(const int index) const;
-
-        /// Returns a variable containing information
-        /// about the image of the ImageLayer.
-        const std::vector<Tmx::Layer*> GetChildren() const noexcept;
+        template <typename T>
+        void IterateChildren(T&& fun) const;
 
         int GetNumChildren() const noexcept;
-
-        /// Sets the offset for this GroupLayer
-        void SetOffset(const int offsetX, const int offsetY);
 
         /// Returns the x offset.
         int GetOffsetX() const noexcept;
@@ -70,9 +63,18 @@ namespace Tmx
         int GetOffsetY() const noexcept;
 
     private:
-        std::vector<Tmx::Layer*> children;
+        std::vector<std::unique_ptr<Tmx::Layer>> children;
 
         int offsetX;
         int offsetY;
     };
+
+    template <typename T>
+    void GroupLayer::IterateChildren(T &&fun) const
+    {
+        for (const auto &c : children)
+        {
+            fun(c.get());
+        }
+    }
 }

@@ -41,7 +41,6 @@ namespace Tmx
     class Image 
     {
     public:
-        Image(const tinyxml2::XMLNode *imageNode);
         Image(const tinyxml2::XMLElement *imageElement);
 
         /// Get the path to the file of the image (relative to the map)

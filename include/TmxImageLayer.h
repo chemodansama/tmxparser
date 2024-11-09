@@ -24,14 +24,11 @@
 #pragma once
 
 #include <memory>
-#include <string>
-#include <vector>
 
 #include <tinyxml2.h>
 
 #include "TmxImage.h"
 #include "TmxLayer.h"
-#include "TmxPropertySet.h"
 
 namespace Tmx
 {
@@ -45,10 +42,7 @@ namespace Tmx
     {
     public:
         /// Construct an ImageLayer on the given map.
-        explicit ImageLayer(Tmx::Map *_map);
-
-        /// Parse a ImageLayer element.
-        void Parse(const tinyxml2::XMLNode *imageLayerNode) override;
+        ImageLayer(Tmx::Map *_map, const tinyxml2::XMLElement *data);
 
         /// Returns a variable containing information
         /// about the image of the ImageLayer.
