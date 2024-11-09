@@ -51,7 +51,6 @@ namespace Tmx
     public:
         /// Construct a new tile with the given id.
         Tile(const tinyxml2::XMLElement *data);
-        Tile() = default;
 
         /// Get the Id. (relative to the tileset)
         int GetId() const
