@@ -169,8 +169,8 @@ namespace Tmx
         /// Get the hexside length.
         int GetHexsideLength() const { return hexside_length; }
 
-        double GetParallaxOriginX() const { return parallaxOriginX; }
-        double GetParallaxOriginY() const { return parallaxOriginY; }
+        float GetParallaxOriginX() const { return parallaxOriginX; }
+        float GetParallaxOriginY() const { return parallaxOriginY; }
 
         bool IsInfinite() const { return infinite; }
 
@@ -265,8 +265,8 @@ namespace Tmx
         int next_object_id{ 0 };
         int hexside_length{ 0 };
 
-        double parallaxOriginX{ 0.0f };
-        double parallaxOriginY{ 0.0f };
+        float parallaxOriginX{ 0.0f };
+        float parallaxOriginY{ 0.0f };
 
         bool infinite{ false };
 

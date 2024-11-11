@@ -254,8 +254,8 @@ namespace Tmx
         , tile_height{ data->IntAttribute("tileheight") }
         , next_object_id{ data->IntAttribute("nextobjectid") }
         , hexside_length{ data->IntAttribute("hexsidelength") }
-        , parallaxOriginX{ data->DoubleAttribute("parallaxoriginx") }
-        , parallaxOriginY{ data->DoubleAttribute("parallaxoriginy") }
+        , parallaxOriginX{ data->FloatAttribute("parallaxoriginx") }
+        , parallaxOriginY{ data->FloatAttribute("parallaxoriginy") }
         , infinite{ static_cast<bool>(data->IntAttribute("infinite")) }
         , properties{ data->FirstChildElement("properties") }
     {
