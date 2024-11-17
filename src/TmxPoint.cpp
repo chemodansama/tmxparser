@@ -88,11 +88,6 @@ namespace Tmx
         }
     }
 
-    bool Point::operator==(const Point &rhs) const
-    {
-        return x == rhs.x && y == rhs.y;
-    }
-
     Point ParsePoint(std::string_view s)
     {
         Point result{ 0.0f, 0.0f };

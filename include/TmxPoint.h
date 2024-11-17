@@ -39,7 +39,7 @@ namespace Tmx
         float x; ///< X coordinate
         float y; ///< Y coordinate
 
-        bool operator==(const Point &rhs) const;
+        bool operator==(const Point &rhs) const = default;
     };
 
     Point ParsePoint(std::string_view s);
