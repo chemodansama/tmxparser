@@ -259,26 +259,39 @@ namespace Tmx
         , infinite{ static_cast<bool>(data->IntAttribute("infinite")) }
         , properties{ data->FirstChildElement("properties") }
     {
-        const auto parseCollection =
-            [&data](const char *name, auto *collection, auto &&parameter) {
-                const auto count = Util::CountChildren(data, name);
-                if (!count)
-                {
-                    return;
-                }
+        // read all other attributes
+        const auto *node = data->FirstChild();
+        while (node) {
+            // Iterate through all of the "layer" (tile layer) elements.
+            const auto v = node->Value();
+            if (!v) {
+                continue;
+            }
 
-                collection->reserve(count);
-                Util::IterateChildren(data, name, [&parameter, &collection](const auto e) {
-                    collection->emplace_back(parameter, e);
-                });
-                assert(collection->size() == count);
-            };
+            const auto element = node->ToElement();
 
-        parseCollection("tileset", &tilesets, file_path);
-        parseCollection("layer", &tile_layers, this);
-        parseCollection("imagelayer", &image_layers, this);
-        parseCollection("objectgroup", &object_groups, this);
-        parseCollection("group", &group_layers, this);
+            if (strcmp(node->Value(), "tileset") == 0) {
+                tilesets.emplace_back(file_path, element);
+            }
+
+            if (strcmp(node->Value(), "layer") == 0) {
+                tile_layers.emplace_back(this, element);
+            }
+
+            if (strcmp(node->Value(), "imagelayer") == 0) {
+                image_layers.emplace_back(this, element);
+            }
+
+            if (strcmp(node->Value(), "objectgroup") == 0) {
+                object_groups.emplace_back(this, element);
+            }
+
+            if (strcmp(node->Value(), "group") == 0) {
+                group_layers.emplace_back(this, element);
+            }
+
+            node = node->NextSibling();
+        }
 
         const auto addLayers = [this](auto &collection) {
             for (auto &v : collection) {
