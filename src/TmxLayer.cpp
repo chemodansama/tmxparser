@@ -100,6 +100,8 @@ namespace Tmx
         , parseOrder(nextParseOrder)
         , parallaxX{ GetFloatAttribute(data, "parallaxx", 1.0f) }
         , parallaxY{ GetFloatAttribute(data, "parallaxy", 1.0f) }
+        , offsetX{ GetFloatAttribute(data, "offsetx", 1.0f) }
+        , offsetY{ GetFloatAttribute(data, "offsety", 1.0f) }
         , layerType(_layerType)
         , properties(data->FirstChildElement("properties"))
     {

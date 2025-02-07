@@ -108,6 +108,12 @@ namespace Tmx
         /// Get vertical parallax
         float GetParallaxY() const { return parallaxY; }
 
+        /// Get horizontal offset
+        float GetOffsetX() const { return offsetX; }
+
+        /// Get vertical offset
+        float GetOffsetY() const { return offsetY; }
+
     protected:
         Layer(Tmx::Map *_map, const Tmx::Tile *_tile, int _x, int _y,
             int _width, int _height, LayerType _layerType, const tinyxml2::XMLElement *data);
@@ -129,6 +135,9 @@ namespace Tmx
 
         float parallaxX;
         float parallaxY;
+
+        float offsetX;
+        float offsetY;
 
         Tmx::LayerType layerType;
 
