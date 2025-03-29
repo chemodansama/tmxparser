@@ -55,7 +55,7 @@ namespace Tmx
         float GetFloatProperty(const std::string &name, float defaultValue = 0.0f) const;
 
         /// Get a string property.
-        const std::string &GetStringProperty(const std::string &name,
+        std::string GetStringProperty(const std::string &name,
             const std::string &defaultValue = {}) const;
 
         /// Get a bool property.

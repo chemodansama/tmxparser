@@ -86,7 +86,7 @@ namespace Tmx
     {
     }
 
-    const std::string &PropertySet::GetStringProperty(const std::string &name,
+    std::string PropertySet::GetStringProperty(const std::string &name,
         const std::string &defaultValue) const
     {
         const auto it = properties.find(name);
