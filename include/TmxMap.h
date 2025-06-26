@@ -129,6 +129,7 @@ namespace Tmx
 
         /// Parse text containing TMX formatted XML.
         static Map ParseText(const std::string &text, const std::string &path = "");
+        static Map ParseText(const char *text, const std::string &path = "");
 
         /// Get a path to the directory of the map file if any.
         const std::string &GetFilepath() const { return file_path; }

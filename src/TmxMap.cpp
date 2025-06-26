@@ -126,9 +126,14 @@ namespace Tmx
 
     Map Map::ParseText(const std::string &text, const std::string &path)
     {
+        return ParseText(text.c_str(), path);
+    }
+
+    Map Map::ParseText(const char *text, const std::string &path)
+    {
         // Create a tiny xml document and use it to parse the text.
         tinyxml2::XMLDocument doc;
-        doc.Parse(text.c_str());
+        doc.Parse(text);
 
         return doc.Error()
             ? Map{ doc.ErrorStr() }
