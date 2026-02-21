@@ -29,6 +29,7 @@
 
 #include <cstdint>
 #include <string>
+#include <string_view>
 
 namespace Tmx
 {
@@ -48,7 +49,7 @@ namespace Tmx
         Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
 
         /// Initialize a color from a string hexadecimal representation in the format "#AARRGGBB" or "#RRGGBB".
-        explicit Color(const std::string& str);
+        explicit Color(const std::string_view& str);
 
         /// Default copy constructor.
         Color(const Color&) = default;

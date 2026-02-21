@@ -28,6 +28,7 @@
 
 #include "TmxColor.h"
 
+#include <charconv>
 #include <cstdio>
 #include <cstdlib>
 
@@ -56,13 +57,22 @@ namespace Tmx
         color |= b;
     }
 
-    Color::Color(const std::string& str)
+    Color::Color(const std::string_view& str)
     {
         // We skip the first # character and then read directly the hexadecimal value
-        color = std::strtoul((str.c_str() + 1), nullptr, 16);
+        const std::from_chars_result result = std::from_chars(
+            str.data() + 1,
+            str.data() + str.size(),
+            color,
+            16
+        );
 
-        // If the input has the short format #RRGGBB without alpha channel we set it to 255
-        if(str.length() == 7) color |= 0xff000000;
+        if (result.ec != std::errc{}) {
+            color = 0xFFFFFFFF;
+        } else if (str.length() == 7) {
+            // If the input has the short format #RRGGBB without alpha channel we set it to 255
+            color |= 0xff000000;
+        }
     }
 
     uint8_t Color::GetAlpha() const

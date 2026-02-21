@@ -66,8 +66,20 @@ namespace Tmx
             const char * const name, const bool defaultValue)
         {
             bool result{ defaultValue };
-            data->QueryBoolAttribute("visible", &result);
+            data->QueryBoolAttribute(name, &result);
             return result;
+        }
+
+        std::optional<Tmx::Color> GetColorAttribute(
+            const tinyxml2::XMLElement * const data,
+            const char * const name)
+        {
+            const char *s;
+            if (data->QueryStringAttribute(name, &s) != tinyxml2::XMLError::XML_SUCCESS) {
+                return {};
+            }
+
+            return Tmx::Color{ s };
         }
     }
 
@@ -104,6 +116,7 @@ namespace Tmx
         , offsetY{ GetFloatAttribute(data, "offsety", 1.0f) }
         , layerType(_layerType)
         , properties(data->FirstChildElement("properties"))
+        , tintColor(GetColorAttribute(data, "tintcolor"))
     {
         ++nextParseOrder;
     }

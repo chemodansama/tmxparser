@@ -27,6 +27,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+#include <optional>
 #include <string>
 
 #include <tinyxml2.h>
@@ -114,6 +115,8 @@ namespace Tmx
         /// Get vertical offset
         float GetOffsetY() const { return offsetY; }
 
+        const std::optional<Color> &GetTintColor() const { return tintColor; }
+
     protected:
         Layer(Tmx::Map *_map, const Tmx::Tile *_tile, int _x, int _y,
             int _width, int _height, LayerType _layerType, const tinyxml2::XMLElement *data);
@@ -142,6 +145,8 @@ namespace Tmx
         Tmx::LayerType layerType;
 
         Tmx::PropertySet properties;
+
+        std::optional<Tmx::Color> tintColor;
         /// @endcond
     };
 }
