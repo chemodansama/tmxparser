@@ -52,10 +52,12 @@ namespace Tmx
             const tinyxml2::XMLElement *data{ nullptr };
             std::string filePath;
 
-            const tinyxml2::XMLElement *operator->() const { return data; }
+            std::string StringAttribute(const char *name, const char *value = 0) const;
+            int IntAttribute(const char *name, int defaultValue = 0) const;
+            const tinyxml2::XMLElement* FirstChildElement(const char* name = 0) const;
 
         private:
-            tinyxml2::XMLDocument doc;
+            std::unique_ptr<tinyxml2::XMLDocument> doc;
         };
     }
 

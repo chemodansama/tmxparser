@@ -57,6 +57,7 @@ namespace Tmx
     namespace TilesetDetails
     {
         TilesetData::TilesetData(const std::string &path, const tinyxml2::XMLElement *data)
+            : doc{ std::make_unique<tinyxml2::XMLDocument>() }
         {
             const char *source = data->Attribute("source");
             if (!source)
@@ -68,23 +69,39 @@ namespace Tmx
 
             for (const auto &fileName : { path + source, std::string{ source } })
             {
-                doc.LoadFile( fileName.c_str() );
-                if (doc.ErrorID() == 0)
+                doc->LoadFile( fileName.c_str() );
+                if (doc->ErrorID() == 0)
                 {
                     filePath = GetFolderName(fileName);
                     break;
                 }
             }
 
-            if (doc.ErrorID() != 0)
+            if (doc->ErrorID() != 0)
             {
                 fprintf(stderr, "failed to load tileset file '%s'\n", source);
                 return;
             }
 
             // Update node and element references to the new node
-            this->data = doc.FirstChildElement("tileset");
+            this->data = doc->FirstChildElement("tileset");
             assert(this->data); //RJCB
+        }
+
+        std::string TilesetData::StringAttribute(const char *name, const char *value) const
+        {
+            const auto cstr = data ? data->Attribute(name, value) : nullptr;
+            return cstr ? std::string{ cstr } : std::string{};
+        }
+
+        int TilesetData::IntAttribute(const char *name, int defaultValue) const
+        {
+            return data ? data->IntAttribute(name, defaultValue) : defaultValue;
+        }
+
+        const tinyxml2::XMLElement *TilesetData::FirstChildElement(const char* name) const
+        {
+            return data ? data->FirstChildElement(name) : nullptr;
         }
     }
 
@@ -96,25 +113,25 @@ namespace Tmx
     Tileset::Tileset(TilesetDetails::TilesetData data, int firstGid)
         : first_gid{ firstGid }
         , file_path{ std::move(data.filePath) }
-        , name{ data->Attribute("name") }
-        , tile_width{ data->IntAttribute("tilewidth") }
-        , tile_height{ data->IntAttribute("tileheight") }
-        , margin{ data->IntAttribute("margin") }
-        , spacing{ data->IntAttribute("spacing") }
-        , tile_count{ data->IntAttribute("tilecount") }
-        , columns{ data->IntAttribute("columns") }
-        , tileOffset{ data->FirstChildElement("tileoffset") }
-        , image{ CreateImage(data->FirstChildElement("image")) }
-        , properties{ data->FirstChildElement("properties") }
+        , name{ data.StringAttribute("name") }
+        , tile_width{ data.IntAttribute("tilewidth") }
+        , tile_height{ data.IntAttribute("tileheight") }
+        , margin{ data.IntAttribute("margin") }
+        , spacing{ data.IntAttribute("spacing") }
+        , tile_count{ data.IntAttribute("tilecount") }
+        , columns{ data.IntAttribute("columns") }
+        , tileOffset{ data.FirstChildElement("tileoffset") }
+        , image{ CreateImage(data.FirstChildElement("image")) }
+        , properties{ data.FirstChildElement("properties") }
     {
         // Parse the terrain types if any.
-        if (const auto terrainTypesNode = data->FirstChildElement("terraintypes"))
+        if (const auto terrainTypesNode = data.FirstChildElement("terraintypes"))
         {
             TerrainArray::Parse(&terrainTypes, terrainTypesNode);
         }
 
         // Iterate through all of the tile elements and parse each.
-        for (auto e = data->FirstChildElement("tile"); e; e = e->NextSiblingElement("tile"))
+        for (auto e = data.FirstChildElement("tile"); e; e = e->NextSiblingElement("tile"))
         {
             tiles.emplace_back(e);
         }
