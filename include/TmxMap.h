@@ -29,6 +29,7 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -130,6 +131,7 @@ namespace Tmx
         /// Parse text containing TMX formatted XML.
         static Map ParseText(const std::string &text, const std::string &path = "");
         static Map ParseText(const char *text, const std::string &path = "");
+        static Map ParseText(std::string_view text, const std::string &path = "");
 
         /// Get a path to the directory of the map file if any.
         const std::string &GetFilepath() const { return file_path; }
